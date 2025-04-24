@@ -11,6 +11,7 @@ import {
   Avatar,
   theme,
 } from 'antd';
+import type { MenuProps } from 'antd';
 import {
   LayoutDashboard,
   ChevronLeft,
@@ -21,6 +22,7 @@ import {
   BarChart2,
   ShoppingCart,
   Users,
+  ClipboardList,
 } from 'lucide-react';
 
 const { Header, Sider, Content } = Layout;
@@ -51,7 +53,13 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
       icon: <Settings className="w-4 h-4" />,
     },
     {
-      type: 'divider',
+      key: 'mcp',
+      label: 'MCP Servers',
+      icon: <Settings className="w-4 h-4" />,
+      onClick: () => router.push('/mcp'),
+    },
+    {
+      type: 'divider' as const,
     },
     {
       key: 'logout',
@@ -61,32 +69,37 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
     },
   ];
 
-  const menuItems = [
+  const menuItems: MenuProps['items'] = [
     {
       key: 'dashboard',
       icon: <LayoutDashboard className="w-4 h-4" />,
       label: 'Dashboard',
-      onClick: () => router.push('/dashboard'),
     },
     {
       key: 'analytics',
       icon: <BarChart2 className="w-4 h-4" />,
       label: 'Analytics',
-      onClick: () => router.push('/analytics'),
     },
     {
       key: 'products',
       icon: <ShoppingCart className="w-4 h-4" />,
       label: 'Products',
-      onClick: () => router.push('/products'),
     },
     {
       key: 'customers',
       icon: <Users className="w-4 h-4" />,
       label: 'Customers',
-      onClick: () => router.push('/customers'),
+    },
+    {
+      key: 'tasks',
+      icon: <ClipboardList className="w-4 h-4" />,
+      label: 'Tasks Manager',
     },
   ];
+
+  const handleMenuClick: MenuProps['onClick'] = (e) => {
+    router.push(`/${e.key}`);
+  };
 
   return (
     <Layout className="min-h-screen">
@@ -118,6 +131,7 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
           className="border-0 px-3 py-4"
           items={menuItems}
           defaultSelectedKeys={['dashboard']}
+          onClick={handleMenuClick}
           style={{ backgroundColor: 'transparent' }}
         />
       </Sider>
