@@ -112,47 +112,6 @@ const AiInsights = () => {
             ))}
           </div>
 
-          <div className="border-t pt-4">
-            <div className="space-y-4">
-              <div className="h-48 overflow-y-auto space-y-3">
-                {chatHistory.map((message) => (
-                  <div
-                    key={message.id}
-                    className={`flex ${
-                      message.isAi ? 'justify-start' : 'justify-end'
-                    }`}
-                  >
-                    <div
-                      className={`rounded-lg p-3 max-w-[80%] ${
-                        message.isAi
-                          ? 'bg-gray-100 text-gray-900'
-                          : 'bg-[#4745D0] text-white'
-                      }`}
-                    >
-                      <p className="text-sm">{message.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              <div className="flex items-center space-x-2">
-                <Input
-                  placeholder="Ask about your data..."
-                  value={question}
-                  onChange={(e) => setQuestion(e.target.value)}
-                  onPressEnter={handleSendQuestion}
-                  prefix={<MessageSquare className="w-4 h-4 text-gray-400" />}
-                />
-                <button
-                  onClick={handleSendQuestion}
-                  disabled={!question.trim()}
-                  className="p-2 bg-[#4745D0] text-white rounded-lg hover:bg-[#3d3bb7] disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Send className="w-4 h-4" />
-                </button>
-              </div>
-            </div>
-          </div>
         </div>
       )}
     </div>

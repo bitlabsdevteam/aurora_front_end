@@ -51,6 +51,7 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
       key: 'settings',
       label: 'Settings',
       icon: <Settings className="w-4 h-4" />,
+      onClick: () => router.push('/settings'),
     },
     {
       key: 'mcp',
@@ -152,15 +153,9 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
               trigger={['click']}
               placement="bottomRight"
             >
-              <div className="flex items-center space-x-3 cursor-pointer hover:bg-gray-50 px-3 py-2 rounded-lg transition-all">
-                <Avatar
-                  style={{
-                    backgroundColor: token.colorPrimary,
-                    color: token.colorBgContainer,
-                  }}
-                  icon={<User className="w-4 h-4" />}
-                />
-                <span className="text-sm font-medium text-gray-800">John Doe</span>
+              <div className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded-lg transition-colors">
+                <Avatar className="bg-[#4745D0] text-white">J</Avatar>
+                <span>John Doe</span>
               </div>
             </Dropdown>
           </div>

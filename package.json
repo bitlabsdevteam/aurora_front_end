@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@ant-design/plots": "^2.3.3",
     "@types/js-cookie": "^3.0.6",
     "@types/uuid": "^10.0.0",
     "antd": "^5.24.8",
