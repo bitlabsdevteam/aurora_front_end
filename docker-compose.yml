@@ -8,6 +8,9 @@ services:
       args:
         - ESLINT_SKIP=true
         - NEXT_ESLINT_SKIP_VALIDATION=1
+        - BUILDKIT_INLINE_CACHE=1
+        - NODE_ENV=production
+    image: ${ECR_REPOSITORY_URI:-aurora/frontend}:${IMAGE_TAG:-latest}
     ports:
       - "3000:3000"
     environment:
@@ -15,6 +18,14 @@ services:
       - NEXT_TELEMETRY_DISABLED=1
       - ESLINT_SKIP=true
       - NEXT_ESLINT_SKIP_VALIDATION=1
+      - AWS_REGION=${AWS_REGION:-us-east-1}
+      # Add other environment variables needed by your application
+    logging:
+      driver: "awslogs"
+      options:
+        awslogs-region: "${AWS_REGION:-us-east-1}"
+        awslogs-group: "/ecs/aurora-frontend"
+        awslogs-stream-prefix: "web"
     restart: unless-stopped
     volumes:
       - ./public:/app/public
@@ -26,6 +37,15 @@ services:
       timeout: 10s
       retries: 3
       start_period: 40s
+    # ECS resource limits
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 1G
+        reservations:
+          cpus: '0.25'
+          memory: 512M
 
 networks:
   app-network:
