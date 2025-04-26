@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import TopWidgets from '../components/dashboard/TopWidgets';
-import AiInsights from '../components/dashboard/AiInsights';
+import PredictedStockouts from '../components/PredictedStockouts';
 import { Skeleton, Card, Input, Button, Upload, message } from 'antd';
 import { SendHorizontal, ImagePlus } from 'lucide-react';
 import type { UploadFile } from 'antd/es/upload/interface';
@@ -52,7 +52,10 @@ const Dashboard = () => {
         <TopWidgets />
 
         <div className="space-y-6">
-          <AiInsights />
+          {/* Predicted Stockouts Section */}
+          <Card className="mb-6">
+            <PredictedStockouts />
+          </Card>
 
           <Card>
             <div className="flex items-center gap-6 mb-4">

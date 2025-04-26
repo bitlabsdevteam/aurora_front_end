@@ -24,18 +24,8 @@ const TopWidgets = () => {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-      {/* Predicted Stock-outs */}
-      <Card className="shadow-sm">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-medium">Predicted Stock-outs</h3>
-          <AlertTriangle className="w-5 h-5 text-amber-500" />
-        </div>
-        <div className="text-2xl font-semibold mb-2">12</div>
-        <Progress percent={75} status="exception" />
-        <p className="text-sm text-gray-500 mt-2">
-          3 items require immediate attention
-        </p>
-      </Card>
+
+
 
       {/* Trending Products */}
       <Card className="shadow-sm">

@@ -2,10 +2,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { Table, Input, DatePicker, Space, Button } from 'antd';
-import type { TablePaginationConfig } from 'antd/es/table';
+import type { TablePaginationConfig, ColumnType } from 'antd/es/table';
 import { SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import isBetween from 'dayjs/plugin/isBetween';
 import MasterLayout from '../components/layout/MasterLayout';
+
+// Register dayjs plugins
+dayjs.extend(isBetween);
 
 const { RangePicker } = DatePicker;
 
@@ -18,29 +22,8 @@ interface Product {
   stock: number;
   createdAt: string;
   status: 'In Stock' | 'Low Stock' | 'Out of Stock';
+  image?: string;
 }
-
-// Generate dummy data
-const generateDummyData = (): Product[] => {
-  const categories = ['Electronics', 'Clothing', 'Home & Garden', 'Books', 'Sports'];
-  const products = ['Laptop', 'Smartphone', 'Headphones', 'T-Shirt', 'Jeans', 'Chair', 'Lamp', 'Novel', 'Basketball'];
-  
-  return Array.from({ length: 40 }, (_, index) => {
-    const stock = Math.floor(Math.random() * 100);
-    const status = stock > 20 ? 'In Stock' : stock > 0 ? 'Low Stock' : 'Out of Stock';
-    
-    return {
-      id: index + 1,
-      sku: `SKU${String(index + 1).padStart(4, '0')}`,
-      name: `${products[Math.floor(Math.random() * products.length)]} ${index + 1}`,
-      category: categories[Math.floor(Math.random() * categories.length)],
-      price: parseFloat((Math.random() * 1000 + 50).toFixed(2)),
-      stock,
-      createdAt: dayjs().subtract(Math.floor(Math.random() * 365), 'day').format('YYYY-MM-DD'),
-      status
-    };
-  });
-};
 
 const ProductsPage = () => {
   const [data, setData] = useState<Product[]>([]);
@@ -50,13 +33,24 @@ const ProductsPage = () => {
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
 
   useEffect(() => {
-    // Simulate API call
-    setTimeout(() => {
-      const dummyData = generateDummyData();
-      setData(dummyData);
-      setFilteredData(dummyData);
-      setLoading(false);
-    }, 1000);
+    // Fetch products from JSON file
+    const fetchProducts = async () => {
+      try {
+        const response = await fetch('/json/products.json');
+        if (!response.ok) {
+          throw new Error('Failed to fetch products');
+        }
+        const data = await response.json();
+        setData(data.products);
+        setFilteredData(data.products);
+      } catch (error) {
+        console.error('Error fetching products:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
   }, []);
 
   const handleSearch = () => {
@@ -87,7 +81,7 @@ const ProductsPage = () => {
     setFilteredData(data);
   };
 
-  const columns = [
+  const columns: ColumnType<Product>[] = [
     {
       title: 'SKU',
       dataIndex: 'sku',
@@ -108,7 +102,8 @@ const ProductsPage = () => {
         text: category,
         value: category,
       })),
-      onFilter: (value: string, record: Product) => record.category === value,
+      onFilter: (value, record: Product) => 
+        record.category === (value as string),
     },
     {
       title: 'Price',
@@ -153,7 +148,7 @@ const ProductsPage = () => {
     <MasterLayout>
       <div className="bg-white rounded-lg shadow p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-800 mb-4">Products</h1>
+          <h1 className="text-2xl font-semibold text-gray-800 mb-4">Products ({filteredData.length})</h1>
           <div className="flex flex-wrap gap-4 items-end">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">

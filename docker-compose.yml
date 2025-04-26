@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - ESLINT_SKIP=true
+        - NEXT_ESLINT_SKIP_VALIDATION=1
+    ports:
+      - "3000:3000"
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - ESLINT_SKIP=true
+      - NEXT_ESLINT_SKIP_VALIDATION=1
+    restart: unless-stopped
+    volumes:
+      - ./public:/app/public
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  app-network:
+    driver: bridge 

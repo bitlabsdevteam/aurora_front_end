@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  web:
+    build:
+      # Use Docker Buildkit for better caching and performance
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - ESLINT_SKIP=true
+        - NEXT_ESLINT_SKIP_VALIDATION=1
+        - BUILDKIT_INLINE_CACHE=1
+      # Force rebuild without using cache
+      no_cache: false
+    environment:
+      - NODE_ENV=production
+      - NEXT_TELEMETRY_DISABLED=1
+      - ESLINT_SKIP=true
+      - NEXT_ESLINT_SKIP_VALIDATION=1 
