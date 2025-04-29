@@ -8,6 +8,7 @@ import MasterLayout from '../components/layout/MasterLayout';
 
 interface Task {
   id: string;
+  name: string;
   owner: string;
   createdAt: string;
   finishedAt: string | null;
@@ -17,6 +18,7 @@ interface Task {
 const tasks: Task[] = [
   {
     id: uuidv4(),
+    name: 'Data Import',
     owner: 'Alice',
     createdAt: '2024-06-01T09:00:00Z',
     finishedAt: null,
@@ -24,6 +26,7 @@ const tasks: Task[] = [
   },
   {
     id: uuidv4(),
+    name: 'Generate Report',
     owner: 'Bob',
     createdAt: '2024-06-01T10:00:00Z',
     finishedAt: '2024-06-01T12:00:00Z',
@@ -31,6 +34,7 @@ const tasks: Task[] = [
   },
   {
     id: uuidv4(),
+    name: 'Sync Inventory',
     owner: 'Charlie',
     createdAt: '2024-06-02T08:30:00Z',
     finishedAt: null,
@@ -38,6 +42,7 @@ const tasks: Task[] = [
   },
   {
     id: uuidv4(),
+    name: 'Backup Database',
     owner: 'Diana',
     createdAt: '2024-06-02T09:15:00Z',
     finishedAt: '2024-06-02T11:45:00Z',
@@ -45,6 +50,7 @@ const tasks: Task[] = [
   },
   {
     id: uuidv4(),
+    name: 'User Audit',
     owner: 'Eve',
     createdAt: '2024-06-03T07:50:00Z',
     finishedAt: null,
@@ -57,6 +63,11 @@ const columns = [
     title: 'Task ID',
     dataIndex: 'id',
     key: 'id',
+  },
+  {
+    title: 'Task Name',
+    dataIndex: 'name',
+    key: 'name',
   },
   {
     title: 'Owner',
