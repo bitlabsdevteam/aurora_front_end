@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import TopWidgets from '../components/dashboard/TopWidgets';
-import PredictedStockouts from '../components/PredictedStockouts';
+import TrendPredictions from '../components/TrendPredictions';
 import { Skeleton, Card, Input, Button, Upload, message } from 'antd';
 import { SendHorizontal, ImagePlus } from 'lucide-react';
 import type { UploadFile } from 'antd/es/upload/interface';
@@ -40,7 +40,7 @@ const Dashboard = () => {
   const content = (
     <div className="min-h-screen bg-[#F8F9FE] p-6">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-2xl font-bold text-gray-900">Fashion Trend Forecasting</h1>
         <div className="flex items-center space-x-4">
           <span className="text-sm text-gray-500">
             Last updated: {new Date().toLocaleString()}
@@ -52,9 +52,9 @@ const Dashboard = () => {
         <TopWidgets />
 
         <div className="space-y-6">
-          {/* Predicted Stockouts Section */}
+          {/* Trend Predictions Section */}
           <Card className="mb-6">
-            <PredictedStockouts />
+            <TrendPredictions />
           </Card>
 
           <Card>
@@ -63,9 +63,9 @@ const Dashboard = () => {
                 <span className="text-white font-semibold">E</span>
               </div>
               <div>
-                <h2 className="text-lg font-medium">Eri - Your AI Assistant</h2>
+                <h2 className="text-lg font-medium">Eri - Your Fashion AI Assistant</h2>
                 <p className="text-sm text-gray-500">
-                  Ask me anything or upload images for analysis
+                  Ask for trend insights or upload images for trend analysis
                 </p>
               </div>
             </div>
@@ -75,7 +75,7 @@ const Dashboard = () => {
                 <Input.TextArea
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
-                  placeholder="Type your message to Eri..."
+                  placeholder="Ask about emerging fashion trends or upload images..."
                   autoSize={{ minRows: 3, maxRows: 6 }}
                   className="resize-none"
                 />
