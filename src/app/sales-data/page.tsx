@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Table, Input, Space, Button, Select, DatePicker } from 'antd';
+import { Table, Input, Space, Button, Select, DatePicker, Alert } from 'antd';
 import type { ColumnType } from 'antd/es/table';
 import { SearchOutlined } from '@ant-design/icons';
 import MasterLayout from '../components/layout/MasterLayout';
@@ -30,24 +30,44 @@ const SalesDataPage = () => {
   const [salesData, setSalesData] = useState<SalesRecord[]>([]);
   const [filteredData, setFilteredData] = useState<SalesRecord[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchText, setSearchText] = useState('');
   const [storeFilter, setStoreFilter] = useState<string>('');
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
 
   useEffect(() => {
-    // Fetch sales data from JSON file
+    // Fetch sales data from our API proxy to avoid CORS issues
     const fetchSalesData = async () => {
       try {
-        const response = await fetch('/json/sales.json');
+        // Use our server-side API proxy instead of calling Astra DB directly
+        const proxyEndpoint = '/api/sales-data';
+        
+        console.log('Fetching sales data from API proxy:', proxyEndpoint);
+        
+        const response = await fetch(proxyEndpoint);
         if (!response.ok) {
-          throw new Error('Failed to fetch sales data');
+          throw new Error(`Failed to fetch sales data: ${response.status} ${response.statusText}`);
         }
+        
         const data = await response.json();
-        setSalesData(data.sales);
-        setFilteredData(data.sales);
-        setLoading(false);
+        console.log('API response received:', data);
+        
+        // Check if data is returned in the expected format
+        const salesArray = Array.isArray(data) ? data : (data.sales || data.data || []);
+        
+        if (salesArray.length === 0) {
+          console.warn('API returned empty data array');
+        }
+        
+        setSalesData(salesArray);
+        setFilteredData(salesArray);
+        setError(null);
       } catch (error) {
-        console.error('Error fetching sales data:', error);
+        console.error('Error fetching sales data from API:', error);
+        setError(`Failed to load sales data: ${error instanceof Error ? error.message : 'Unknown error'}`);
+        setSalesData([]);
+        setFilteredData([]);
+      } finally {
         setLoading(false);
       }
     };
@@ -166,6 +186,17 @@ const SalesDataPage = () => {
       <div className="bg-white rounded-lg shadow p-6">
         <div className="mb-6">
           <h1 className="text-2xl font-semibold text-gray-800 mb-4">{t('sales.title')} ({filteredData.length} {t('sales.records')})</h1>
+          
+          {error && (
+            <Alert
+              message="Error"
+              description={error}
+              type="error"
+              showIcon
+              className="mb-4"
+            />
+          )}
+          
           <div className="flex flex-wrap gap-4 items-end">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
