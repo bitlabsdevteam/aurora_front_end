@@ -24,6 +24,7 @@ import {
   Users,
   ClipboardList,
 } from 'lucide-react';
+import { useLocale } from '../../../context/LocaleContext';
 
 const { Header, Sider, Content } = Layout;
 
@@ -35,6 +36,7 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
   const [collapsed, setCollapsed] = useState(false);
   const router = useRouter();
   const { token } = theme.useToken();
+  const { t } = useLocale();
 
   const handleLogout = () => {
     document.cookie = 'auth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT';
@@ -44,18 +46,18 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
   const userMenuItems = [
     {
       key: 'profile',
-      label: 'Profile',
+      label: t('menu.profile'),
       icon: <User className="w-4 h-4" />,
     },
     {
       key: 'settings',
-      label: 'Settings',
+      label: t('menu.settings'),
       icon: <Settings className="w-4 h-4" />,
       onClick: () => router.push('/settings'),
     },
     {
       key: 'mcp',
-      label: 'MCP Servers',
+      label: t('menu.mcp'),
       icon: <Settings className="w-4 h-4" />,
       onClick: () => router.push('/mcp'),
     },
@@ -64,7 +66,7 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
     },
     {
       key: 'logout',
-      label: 'Logout',
+      label: t('menu.logout'),
       icon: <LogOut className="w-4 h-4" />,
       onClick: handleLogout,
     },
@@ -74,32 +76,32 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
     {
       key: 'dashboard',
       icon: <LayoutDashboard className="w-4 h-4" />,
-      label: 'Dashboard',
+      label: t('menu.dashboard'),
     },
     {
       key: 'analytics',
       icon: <BarChart2 className="w-4 h-4" />,
-      label: 'Analytics',
+      label: t('menu.analytics'),
     },
     {
       key: 'products',
       icon: <ShoppingCart className="w-4 h-4" />,
-      label: 'Products',
+      label: t('menu.products'),
     },
     {
       key: 'sales-data',
       icon: <BarChart2 className="w-4 h-4" />,
-      label: 'Sales Data',
+      label: t('menu.salesData'),
     },
     {
       key: 'customers',
       icon: <Users className="w-4 h-4" />,
-      label: 'Customers',
+      label: t('menu.customers'),
     },
     {
       key: 'tasks',
       icon: <ClipboardList className="w-4 h-4" />,
-      label: 'Tasks Manager',
+      label: t('menu.tasks'),
     },
   ];
 
@@ -160,7 +162,7 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
             >
               <div className="flex items-center gap-4 cursor-pointer hover:bg-gray-50 px-2 py-1 rounded-lg transition-colors">
                 <Avatar className="bg-[#4745D0] text-white">J</Avatar>
-                <span>John Doe</span>
+                <span>{t('user.name')}</span>
               </div>
             </Dropdown>
           </div>

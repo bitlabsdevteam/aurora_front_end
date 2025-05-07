@@ -5,6 +5,7 @@ import { Table, Input, Space, Button, Select } from 'antd';
 import type { ColumnType } from 'antd/es/table';
 import { SearchOutlined } from '@ant-design/icons';
 import MasterLayout from '../components/layout/MasterLayout';
+import { useLocale } from '../../context/LocaleContext';
 
 interface SalesRecord {
   id: number;
@@ -19,6 +20,8 @@ interface SalesRecord {
 }
 
 const SalesDataPage = () => {
+  const { t } = useLocale();
+  
   // Sample sales data for 2024
   const salesData: SalesRecord[] = [
     { id: 1, month: 'January', product: 'Summer Dress', region: 'North America', unitsSold: 1250, revenue: 56250, costOfGoods: 31250, profit: 25000, date: '2024-01-31' },
@@ -75,7 +78,7 @@ const SalesDataPage = () => {
 
   const columns: ColumnType<SalesRecord>[] = [
     {
-      title: 'Month',
+      title: t('Month'),
       dataIndex: 'month',
       key: 'month',
       sorter: (a, b) => {
@@ -85,40 +88,40 @@ const SalesDataPage = () => {
       }
     },
     {
-      title: 'Product',
+      title: t('Product'),
       dataIndex: 'product',
       key: 'product',
       sorter: (a, b) => a.product.localeCompare(b.product),
     },
     {
-      title: 'Region',
+      title: t('Region'),
       dataIndex: 'region',
       key: 'region',
       filters: regions.map(region => ({ text: region, value: region })),
       onFilter: (value, record) => record.region === value,
     },
     {
-      title: 'Units Sold',
+      title: t('Units Sold'),
       dataIndex: 'unitsSold',
       key: 'unitsSold',
       sorter: (a, b) => a.unitsSold - b.unitsSold,
     },
     {
-      title: 'Revenue',
+      title: t('Revenue'),
       dataIndex: 'revenue',
       key: 'revenue',
       render: (revenue) => `$${revenue.toLocaleString()}`,
       sorter: (a, b) => a.revenue - b.revenue,
     },
     {
-      title: 'Cost of Goods',
+      title: t('Cost of Goods'),
       dataIndex: 'costOfGoods',
       key: 'costOfGoods',
       render: (cost) => `$${cost.toLocaleString()}`,
       sorter: (a, b) => a.costOfGoods - b.costOfGoods,
     },
     {
-      title: 'Profit',
+      title: t('Profit'),
       dataIndex: 'profit',
       key: 'profit',
       render: (profit) => `$${profit.toLocaleString()}`,
@@ -130,14 +133,14 @@ const SalesDataPage = () => {
     <MasterLayout>
       <div className="bg-white rounded-lg shadow p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-800 mb-4">Sales Data 2024 ({filteredData.length} records)</h1>
+          <h1 className="text-2xl font-semibold text-gray-800 mb-4">{t('sales.title')} ({filteredData.length} {t('sales.records')})</h1>
           <div className="flex flex-wrap gap-4 items-end">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Search by Product
+                {t('sales.searchProduct')}
               </label>
               <Input
-                placeholder="Search product name"
+                placeholder={t('sales.searchProduct')}
                 value={searchText}
                 onChange={e => setSearchText(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -146,10 +149,10 @@ const SalesDataPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Region
+                {t('sales.region')}
               </label>
               <Select
-                placeholder="Select Region"
+                placeholder={t('sales.region')}
                 value={regionFilter}
                 onChange={value => setRegionFilter(value)}
                 allowClear
@@ -159,9 +162,9 @@ const SalesDataPage = () => {
             </div>
             <Space>
               <Button type="primary" onClick={handleSearch} className="bg-[#4745D0]">
-                Search
+                {t('sales.search')}
               </Button>
-              <Button onClick={handleReset}>Reset</Button>
+              <Button onClick={handleReset}>{t('sales.reset')}</Button>
             </Space>
           </div>
         </div>
@@ -174,7 +177,7 @@ const SalesDataPage = () => {
             total: filteredData.length,
             pageSize: 10,
             showSizeChanger: true,
-            showTotal: (total) => `Total ${total} records`,
+            showTotal: (total) => `${t('sales.total')} ${total} ${t('sales.records')}`,
           }}
         />
       </div>

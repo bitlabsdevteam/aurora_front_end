@@ -5,6 +5,7 @@ import { Table, Badge } from 'antd';
 import dayjs from 'dayjs';
 import { v4 as uuidv4 } from 'uuid';
 import MasterLayout from '../components/layout/MasterLayout';
+import { useLocale } from '../../context/LocaleContext';
 
 interface Task {
   id: string;
@@ -58,52 +59,54 @@ const tasks: Task[] = [
   },
 ];
 
-const columns = [
-  {
-    title: 'Task ID',
-    dataIndex: 'id',
-    key: 'id',
-  },
-  {
-    title: 'Task Name',
-    dataIndex: 'name',
-    key: 'name',
-  },
-  {
-    title: 'Owner',
-    dataIndex: 'owner',
-    key: 'owner',
-  },
-  {
-    title: 'Created Date Time',
-    dataIndex: 'createdAt',
-    key: 'createdAt',
-    render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm:ss'),
-  },
-  {
-    title: 'Finished Date Time',
-    dataIndex: 'finishedAt',
-    key: 'finishedAt',
-    render: (date: string | null) => date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : <span className="text-gray-400">-</span>,
-  },
-  {
-    title: 'Status',
-    dataIndex: 'status',
-    key: 'status',
-    render: (status: string) => (
-      <Badge
-        status={status === 'Finished' ? 'success' : 'processing'}
-        text={status}
-      />
-    ),
-  },
-];
-
 const TasksManagerPage = () => {
+  const { t } = useLocale();
+  
+  const columns = [
+    {
+      title: t('tasks.taskID'),
+      dataIndex: 'id',
+      key: 'id',
+    },
+    {
+      title: t('tasks.taskName'),
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: t('tasks.owner'),
+      dataIndex: 'owner',
+      key: 'owner',
+    },
+    {
+      title: t('tasks.createdDateTime'),
+      dataIndex: 'createdAt',
+      key: 'createdAt',
+      render: (date: string) => dayjs(date).format('YYYY-MM-DD HH:mm:ss'),
+    },
+    {
+      title: t('tasks.finishedDateTime'),
+      dataIndex: 'finishedAt',
+      key: 'finishedAt',
+      render: (date: string | null) => date ? dayjs(date).format('YYYY-MM-DD HH:mm:ss') : <span className="text-gray-400">-</span>,
+    },
+    {
+      title: t('tasks.status'),
+      dataIndex: 'status',
+      key: 'status',
+      render: (status: string) => (
+        <Badge
+          status={status === 'Finished' ? 'success' : 'processing'}
+          text={status === 'Finished' ? t('tasks.completed') : t('tasks.inProgress')}
+        />
+      ),
+    },
+  ];
+
   return (
     <MasterLayout>
       <div className="bg-white rounded-lg shadow p-6">
-        <h1 className="text-2xl font-semibold text-gray-800 mb-4">Tasks Manager</h1>
+        <h1 className="text-2xl font-semibold text-gray-800 mb-4">{t('tasks.title')}</h1>
         <Table
           columns={columns}
           dataSource={tasks}

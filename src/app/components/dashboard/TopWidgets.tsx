@@ -3,8 +3,11 @@
 import { Card, Progress, Badge, Button, Tag, Tooltip } from "antd";
 import { TrendingUp, Globe, Hash, Clock, Instagram, Users, BarChart2, ThumbsUp } from "lucide-react";
 import { AreaChart, Area, BarChart, Bar, PieChart, Pie, Cell, ResponsiveContainer, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, Legend } from "recharts";
+import { useLocale } from "../../../context/LocaleContext";
 
 const TopWidgets = () => {
+  const { t } = useLocale();
+
   // Mock data for trending styles over time (last 6 months)
   const trendData = [
     { month: "Jan", casual: 45, formal: 35, athleisure: 20 },
@@ -53,7 +56,7 @@ const TopWidgets = () => {
       {/* Trending Style Categories */}
       <Card className="shadow-sm col-span-2">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-medium">Style Category Trends</h3>
+          <h3 className="text-base font-medium">{t('widgets.styleCategoryTrends')}</h3>
           <TrendingUp className="w-5 h-5 text-green-500" />
         </div>
         <div style={{ width: '100%', height: 200 }}>
@@ -74,14 +77,14 @@ const TopWidgets = () => {
           </ResponsiveContainer>
         </div>
         <div className="mt-2 text-sm text-gray-500">
-          Athleisure trending up strongly (+45% in 6 months)
+          {t('widgets.athleiusreTrending')}
         </div>
       </Card>
 
       {/* Color Trends */}
       <Card className="shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-medium">Color Trends</h3>
+          <h3 className="text-base font-medium">{t('widgets.colorTrends')}</h3>
           <Hash className="w-5 h-5 text-purple-500" />
         </div>
         <div style={{ width: '100%', height: 140 }}>
@@ -102,12 +105,12 @@ const TopWidgets = () => {
                   <Cell key={`cell-${index}`} fill={entry.color} />
                 ))}
               </Pie>
-              <RechartsTooltip formatter={(value) => [`${value}%`, 'Market Share']} />
+              <RechartsTooltip formatter={(value) => [`${value}%`, t('widgets.marketShare')]} />
             </PieChart>
           </ResponsiveContainer>
         </div>
         <div className="mt-2 text-sm text-gray-500 flex justify-between">
-          <span>Trending: Sage Green</span>
+          <span>{t('widgets.trendingSageGreen')}</span>
           <span className="font-medium text-green-500">+35% YoY</span>
         </div>
       </Card>
@@ -115,13 +118,13 @@ const TopWidgets = () => {
       {/* Pattern & Print Trends */}
       <Card className="shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-medium">Pattern & Print Trends</h3>
+          <h3 className="text-base font-medium">{t('widgets.patternPrintTrends')}</h3>
           <BarChart2 className="w-5 h-5 text-blue-500" />
         </div>
         <div className="space-y-3">
           {patternTrends.map((pattern, index) => (
             <div key={index} className="flex items-center justify-between">
-              <Tooltip title={`Best for ${pattern.season}`}>
+              <Tooltip title={`${t('widgets.bestFor')} ${pattern.season}`}>
                 <span className="text-sm cursor-help border-b border-dotted border-gray-300">{pattern.name}</span>
               </Tooltip>
               <div className="flex items-center gap-2">
@@ -136,7 +139,7 @@ const TopWidgets = () => {
       {/* Regional Trends */}
       <Card className="shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-medium">Regional Trend Focus</h3>
+          <h3 className="text-base font-medium">{t('widgets.regionalTrendFocus')}</h3>
           <Globe className="w-5 h-5 text-blue-500" />
         </div>
         <div style={{ width: '100%', height: 140 }}>
@@ -149,20 +152,20 @@ const TopWidgets = () => {
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis type="number" domain={[0, 40]} />
               <YAxis dataKey="region" type="category" width={40} />
-              <RechartsTooltip formatter={(value) => [`${value}%`, 'Trend Strength']} />
+              <RechartsTooltip formatter={(value) => [`${value}%`, t('widgets.trendStrength')]} />
               <Bar dataKey="value" fill="#4745D0" />
             </BarChart>
           </ResponsiveContainer>
         </div>
         <div className="mt-2 text-sm text-gray-500">
-          EU showing strongest adoption of new trends
+          {t('widgets.euStrongestAdoption')}
         </div>
       </Card>
 
       {/* Social Media Impact */}
       <Card className="shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-medium">Social Media Impact</h3>
+          <h3 className="text-base font-medium">{t('widgets.socialMediaImpact')}</h3>
           <Instagram className="w-5 h-5 text-pink-500" />
         </div>
         <div className="flex flex-col" style={{ height: 160 }}>
@@ -180,7 +183,7 @@ const TopWidgets = () => {
                   width={110}
                   tick={{ fontSize: 11 }}
                 />
-                <RechartsTooltip formatter={(value) => [`${value}%`, 'Trend Influence']} />
+                <RechartsTooltip formatter={(value) => [`${value}%`, t('widgets.trendInfluence')]} />
                 <Bar dataKey="value">
                   {influencerData.map((entry, index) => (
                     <Cell key={`cell-${index}`} fill={entry.color} />
@@ -190,7 +193,7 @@ const TopWidgets = () => {
             </ResponsiveContainer>
           </div>
           <div className="mt-3 text-sm text-gray-500 text-center">
-            Mid-tier influencers (50-500K) driving highest engagement
+            {t('widgets.midTierInfluencers')}
           </div>
         </div>
       </Card>
@@ -198,44 +201,44 @@ const TopWidgets = () => {
       {/* Top Rising Trends */}
       <Card className="shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-medium">Top Rising Trends</h3>
+          <h3 className="text-base font-medium">{t('widgets.topRisingTrends')}</h3>
           <ThumbsUp className="w-5 h-5 text-green-500" />
         </div>
         <div className="space-y-2">
           <div className="flex justify-between items-center">
-            <span className="text-sm">Oversized Blazers</span>
+            <span className="text-sm">{t('widgets.oversizedBlazers')}</span>
             <Badge count="+105%" style={{ backgroundColor: '#4745D0' }} />
           </div>
           <Progress percent={75} strokeColor="#4745D0" showInfo={false} />
           
           <div className="flex justify-between items-center">
-            <span className="text-sm">Wide-Leg Jeans</span>
+            <span className="text-sm">{t('widgets.wideLegJeans')}</span>
             <Badge count="+82%" style={{ backgroundColor: '#4745D0' }} />
           </div>
           <Progress percent={65} strokeColor="#4745D0" showInfo={false} />
           
           <div className="flex justify-between items-center">
-            <span className="text-sm">Crochet Tops</span>
+            <span className="text-sm">{t('widgets.crochetTops')}</span>
             <Badge count="+67%" style={{ backgroundColor: '#4745D0' }} />
           </div>
           <Progress percent={55} strokeColor="#4745D0" showInfo={false} />
         </div>
         <Button type="link" className="p-0 mt-3 text-[#4745D0]">
-          View All Trends
+          {t('widgets.viewAllTrends')}
         </Button>
       </Card>
 
       {/* Trend Lifecycle */}
       <Card className="shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-base font-medium">Trend Lifecycle Stage</h3>
+          <h3 className="text-base font-medium">{t('widgets.trendLifecycleStage')}</h3>
           <Clock className="w-5 h-5 text-amber-500" />
         </div>
         <div className="space-y-3">
           <div>
             <div className="flex justify-between mb-1">
-              <span className="text-sm">Y2K Revival</span>
-              <span className="text-sm text-gray-500">Mainstream</span>
+              <span className="text-sm">{t('widgets.y2kRevival')}</span>
+              <span className="text-sm text-gray-500">{t('widgets.mainstream')}</span>
             </div>
             <div className="h-2 w-full bg-gray-200 rounded-full">
               <div className="h-2 bg-[#4745D0] rounded-full" style={{ width: '75%' }}></div>
@@ -244,7 +247,7 @@ const TopWidgets = () => {
           <div>
             <div className="flex justify-between mb-1">
               <span className="text-sm">Prairie Dresses</span>
-              <span className="text-sm text-amber-500">Declining</span>
+              <span className="text-sm text-amber-500">{t('widgets.declining')}</span>
             </div>
             <div className="h-2 w-full bg-gray-200 rounded-full">
               <div className="h-2 bg-amber-500 rounded-full" style={{ width: '90%' }}></div>

@@ -7,11 +7,13 @@ import { Skeleton, Card, Input, Button, Upload, message } from 'antd';
 import { SendHorizontal, ImagePlus } from 'lucide-react';
 import type { UploadFile } from 'antd/es/upload/interface';
 import MasterLayout from '../components/layout/MasterLayout';
+import { useLocale } from '../../context/LocaleContext';
 
 const Dashboard = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [userInput, setUserInput] = useState("");
   const [fileList, setFileList] = useState<UploadFile[]>([]);
+  const { t } = useLocale();
 
   useEffect(() => {
     // Simulate data loading
@@ -40,10 +42,10 @@ const Dashboard = () => {
   const content = (
     <div className="min-h-screen bg-[#F8F9FE] p-6">
       <div className="flex items-center justify-between mb-8">
-        <h1 className="text-2xl font-bold text-gray-900">Fashion Trend Forecasting</h1>
+        <h1 className="text-2xl font-bold text-gray-900">{t('dashboard.title')}</h1>
         <div className="flex items-center space-x-4">
           <span className="text-sm text-gray-500">
-            Last updated: {new Date().toLocaleString()}
+            {t('dashboard.lastUpdated')}: {new Date().toLocaleString()}
           </span>
         </div>
       </div>
@@ -63,9 +65,9 @@ const Dashboard = () => {
                 <span className="text-white font-semibold">E</span>
               </div>
               <div>
-                <h2 className="text-lg font-medium">Eri - Your Fashion AI Assistant</h2>
+                <h2 className="text-lg font-medium">{t('dashboard.aiAssistant')}</h2>
                 <p className="text-sm text-gray-500">
-                  Ask for trend insights or upload images for trend analysis
+                  {t('dashboard.aiAssistantDesc')}
                 </p>
               </div>
             </div>
@@ -75,7 +77,7 @@ const Dashboard = () => {
                 <Input.TextArea
                   value={userInput}
                   onChange={(e) => setUserInput(e.target.value)}
-                  placeholder="Ask about emerging fashion trends or upload images..."
+                  placeholder={t('dashboard.placeholder')}
                   autoSize={{ minRows: 3, maxRows: 6 }}
                   className="resize-none"
                 />
@@ -99,7 +101,7 @@ const Dashboard = () => {
                 onClick={handleSend}
                 className="flex items-center justify-center bg-[#4745D0]"
               >
-                Send
+                {t('dashboard.send')}
               </Button>
             </div>
 

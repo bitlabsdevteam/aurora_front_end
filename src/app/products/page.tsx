@@ -7,6 +7,7 @@ import { SearchOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import MasterLayout from '../components/layout/MasterLayout';
+import { useLocale } from '../../context/LocaleContext';
 
 // Register dayjs plugins
 dayjs.extend(isBetween);
@@ -26,6 +27,7 @@ interface Product {
 }
 
 const ProductsPage = () => {
+  const { t } = useLocale();
   const [data, setData] = useState<Product[]>([]);
   const [filteredData, setFilteredData] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -81,21 +83,28 @@ const ProductsPage = () => {
     setFilteredData(data);
   };
 
+  const getStatusTranslation = (status: string) => {
+    if (status === 'In Stock') return t('products.inStock');
+    if (status === 'Low Stock') return t('products.lowStock');
+    if (status === 'Out of Stock') return t('products.outOfStock');
+    return status;
+  };
+
   const columns: ColumnType<Product>[] = [
     {
-      title: 'SKU',
+      title: t('products.sku'),
       dataIndex: 'sku',
       key: 'sku',
       sorter: (a: Product, b: Product) => a.sku.localeCompare(b.sku),
     },
     {
-      title: 'Name',
+      title: t('products.name'),
       dataIndex: 'name',
       key: 'name',
       sorter: (a: Product, b: Product) => a.name.localeCompare(b.name),
     },
     {
-      title: 'Category',
+      title: t('products.category'),
       dataIndex: 'category',
       key: 'category',
       filters: Array.from(new Set(data.map(item => item.category))).map(category => ({
@@ -106,20 +115,20 @@ const ProductsPage = () => {
         record.category === (value as string),
     },
     {
-      title: 'Price',
+      title: t('products.price'),
       dataIndex: 'price',
       key: 'price',
       render: (price: number) => `$${price.toFixed(2)}`,
       sorter: (a: Product, b: Product) => a.price - b.price,
     },
     {
-      title: 'Stock',
+      title: t('products.stock'),
       dataIndex: 'stock',
       key: 'stock',
       sorter: (a: Product, b: Product) => a.stock - b.stock,
     },
     {
-      title: 'Status',
+      title: t('products.status'),
       dataIndex: 'status',
       key: 'status',
       render: (status: string) => (
@@ -132,12 +141,12 @@ const ProductsPage = () => {
               : 'bg-red-100 text-red-800'
           }`}
         >
-          {status}
+          {getStatusTranslation(status)}
         </span>
       ),
     },
     {
-      title: 'Created At',
+      title: t('products.createdAt'),
       dataIndex: 'createdAt',
       key: 'createdAt',
       sorter: (a: Product, b: Product) => dayjs(a.createdAt).unix() - dayjs(b.createdAt).unix(),
@@ -148,14 +157,14 @@ const ProductsPage = () => {
     <MasterLayout>
       <div className="bg-white rounded-lg shadow p-6">
         <div className="mb-6">
-          <h1 className="text-2xl font-semibold text-gray-800 mb-4">Products ({filteredData.length})</h1>
+          <h1 className="text-2xl font-semibold text-gray-800 mb-4">{t('products.title')} ({filteredData.length})</h1>
           <div className="flex flex-wrap gap-4 items-end">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Search by SKU/Name
+                {t('products.searchBySkuName')}
               </label>
               <Input
-                placeholder="Search SKU or product name"
+                placeholder={t('products.searchPlaceholder')}
                 value={searchText}
                 onChange={e => setSearchText(e.target.value)}
                 prefix={<SearchOutlined />}
@@ -164,7 +173,7 @@ const ProductsPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Date Range
+                {t('products.dateRange')}
               </label>
               <RangePicker
                 value={dateRange}
@@ -174,9 +183,9 @@ const ProductsPage = () => {
             </div>
             <Space>
               <Button type="primary" onClick={handleSearch} className="bg-[#4745D0]">
-                Search
+                {t('products.search')}
               </Button>
-              <Button onClick={handleReset}>Reset</Button>
+              <Button onClick={handleReset}>{t('products.reset')}</Button>
             </Space>
           </div>
         </div>
@@ -190,7 +199,7 @@ const ProductsPage = () => {
             total: filteredData.length,
             pageSize: 10,
             showSizeChanger: true,
-            showTotal: (total) => `Total ${total} items`,
+            showTotal: (total) => `${t('products.total')} ${total} ${t('products.items')}`,
           }}
         />
       </div>
