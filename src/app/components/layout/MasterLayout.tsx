@@ -94,11 +94,6 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
       label: t('menu.salesData'),
     },
     {
-      key: 'customers',
-      icon: <Users className="w-4 h-4" />,
-      label: t('menu.customers'),
-    },
-    {
       key: 'tasks',
       icon: <ClipboardList className="w-4 h-4" />,
       label: t('menu.tasks'),
