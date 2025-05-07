@@ -87,6 +87,11 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
       label: 'Products',
     },
     {
+      key: 'sales-data',
+      icon: <BarChart2 className="w-4 h-4" />,
+      label: 'Sales Data',
+    },
+    {
       key: 'customers',
       icon: <Users className="w-4 h-4" />,
       label: 'Customers',
@@ -116,7 +121,7 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
           <Link href="/dashboard" className="flex items-center space-x-3">
             <span className="text-2xl font-bold text-[#4745D0]">A</span>
             {!collapsed && (
-              <span className="text-xl font-semibold text-gray-800">Aurora</span>
+              <span className="text-xl font-semibold text-gray-800">Alyka</span>
             )}
           </Link>
           <Button

@@ -43,7 +43,7 @@ const Login: React.FC<LoginProps> = ({ onLoginSuccess }) => {
     <div className="min-h-screen bg-[#F8F9FE] flex flex-col items-center justify-center px-4">
       <div className="w-full max-w-md space-y-8">
         <div className="text-center">
-          <h1 className="text-[#4745D0] text-4xl font-bold mb-2">Aurora</h1>
+          <h1 className="text-[#4745D0] text-4xl font-bold mb-2">Alyka</h1>
         
           <p className="text-gray-600">
             Get data you can trust and the insights you need to take action and drive growth.
