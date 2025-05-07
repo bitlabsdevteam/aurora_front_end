@@ -36,7 +36,17 @@ const en = {
     search: 'Search',
     reset: 'Reset',
     total: 'Total',
-    records: 'records'
+    records: 'records',
+    transactionId: 'Transaction ID',
+    storeId: 'Store ID',
+    date: 'Date',
+    productId: 'Product ID',
+    productName: 'Product Name',
+    quantity: 'Quantity',
+    price: 'Price',
+    total_amount: 'Total',
+    staffId: 'Staff ID',
+    paymentMethod: 'Payment Method'
   },
   settings: {
     title: 'Settings',

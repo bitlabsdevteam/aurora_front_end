@@ -1,54 +1,59 @@
 'use client';
 
-import React, { useState } from 'react';
-import { Table, Input, Space, Button, Select } from 'antd';
+import React, { useState, useEffect } from 'react';
+import { Table, Input, Space, Button, Select, DatePicker } from 'antd';
 import type { ColumnType } from 'antd/es/table';
 import { SearchOutlined } from '@ant-design/icons';
 import MasterLayout from '../components/layout/MasterLayout';
 import { useLocale } from '../../context/LocaleContext';
+import dayjs from 'dayjs';
+
+const { RangePicker } = DatePicker;
 
 interface SalesRecord {
-  id: number;
-  month: string;
-  product: string;
-  region: string;
-  unitsSold: number;
-  revenue: number;
-  costOfGoods: number;
-  profit: number;
+  _id: string;
+  transaction_id: string;
+  store_id: string;
   date: string;
+  product_id: string;
+  product_name: string;
+  quantity: string;
+  price: string;
+  total: string;
+  staff_id: string;
+  payment_method: string;
 }
 
 const SalesDataPage = () => {
   const { t } = useLocale();
   
-  // Sample sales data for 2024
-  const salesData: SalesRecord[] = [
-    { id: 1, month: 'January', product: 'Summer Dress', region: 'North America', unitsSold: 1250, revenue: 56250, costOfGoods: 31250, profit: 25000, date: '2024-01-31' },
-    { id: 2, month: 'January', product: 'Winter Jacket', region: 'Europe', unitsSold: 890, revenue: 89000, costOfGoods: 53400, profit: 35600, date: '2024-01-31' },
-    { id: 3, month: 'February', product: 'Denim Jeans', region: 'North America', unitsSold: 1450, revenue: 72500, costOfGoods: 43500, profit: 29000, date: '2024-02-28' },
-    { id: 4, month: 'February', product: 'Casual Shirts', region: 'Asia', unitsSold: 2100, revenue: 63000, costOfGoods: 37800, profit: 25200, date: '2024-02-28' },
-    { id: 5, month: 'March', product: 'Athletic Shoes', region: 'Europe', unitsSold: 960, revenue: 115200, costOfGoods: 67200, profit: 48000, date: '2024-03-31' },
-    { id: 6, month: 'March', product: 'Casual Shorts', region: 'North America', unitsSold: 1820, revenue: 54600, costOfGoods: 32760, profit: 21840, date: '2024-03-31' },
-    { id: 7, month: 'April', product: 'Spring Collection', region: 'Asia', unitsSold: 2450, revenue: 98000, costOfGoods: 58800, profit: 39200, date: '2024-04-30' },
-    { id: 8, month: 'April', product: 'Accessories', region: 'Europe', unitsSold: 3200, revenue: 48000, costOfGoods: 25600, profit: 22400, date: '2024-04-30' },
-    { id: 9, month: 'May', product: 'Summer Collection', region: 'North America', unitsSold: 2850, revenue: 142500, costOfGoods: 85500, profit: 57000, date: '2024-05-31' },
-    { id: 10, month: 'May', product: 'Swimwear', region: 'Asia', unitsSold: 1750, revenue: 78750, costOfGoods: 43750, profit: 35000, date: '2024-05-31' },
-    { id: 11, month: 'June', product: 'Sandals', region: 'Europe', unitsSold: 1560, revenue: 62400, costOfGoods: 35880, profit: 26520, date: '2024-06-30' },
-    { id: 12, month: 'June', product: 'Summer Hats', region: 'North America', unitsSold: 980, revenue: 29400, costOfGoods: 14700, profit: 14700, date: '2024-06-30' },
-    { id: 13, month: 'July', product: 'Beach Collection', region: 'Asia', unitsSold: 2350, revenue: 117500, costOfGoods: 70500, profit: 47000, date: '2024-07-31' },
-    { id: 14, month: 'July', product: 'Casual Wear', region: 'Europe', unitsSold: 1870, revenue: 74800, costOfGoods: 44880, profit: 29920, date: '2024-07-31' },
-    { id: 15, month: 'August', product: 'Back to School', region: 'North America', unitsSold: 3250, revenue: 162500, costOfGoods: 97500, profit: 65000, date: '2024-08-31' },
-    { id: 16, month: 'August', product: 'Fall Preview', region: 'Asia', unitsSold: 1650, revenue: 82500, costOfGoods: 49500, profit: 33000, date: '2024-08-31' },
-    { id: 17, month: 'September', product: 'Fall Collection', region: 'Europe', unitsSold: 2120, revenue: 106000, costOfGoods: 63600, profit: 42400, date: '2024-09-30' },
-    { id: 18, month: 'September', product: 'Light Jackets', region: 'North America', unitsSold: 1380, revenue: 96600, costOfGoods: 55200, profit: 41400, date: '2024-09-30' },
-    { id: 19, month: 'October', product: 'Winter Preview', region: 'Asia', unitsSold: 1720, revenue: 120400, costOfGoods: 68800, profit: 51600, date: '2024-10-31' },
-    { id: 20, month: 'October', product: 'Fall Boots', region: 'Europe', unitsSold: 1480, revenue: 118400, costOfGoods: 66640, profit: 51760, date: '2024-10-31' },
-  ];
-
-  const [filteredData, setFilteredData] = useState<SalesRecord[]>(salesData);
+  const [salesData, setSalesData] = useState<SalesRecord[]>([]);
+  const [filteredData, setFilteredData] = useState<SalesRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
-  const [regionFilter, setRegionFilter] = useState<string>('');
+  const [storeFilter, setStoreFilter] = useState<string>('');
+  const [dateRange, setDateRange] = useState<[dayjs.Dayjs | null, dayjs.Dayjs | null]>([null, null]);
+
+  useEffect(() => {
+    // Fetch sales data from JSON file
+    const fetchSalesData = async () => {
+      try {
+        const response = await fetch('/json/sales.json');
+        if (!response.ok) {
+          throw new Error('Failed to fetch sales data');
+        }
+        const data = await response.json();
+        setSalesData(data.sales);
+        setFilteredData(data.sales);
+        setLoading(false);
+      } catch (error) {
+        console.error('Error fetching sales data:', error);
+        setLoading(false);
+      }
+    };
+
+    fetchSalesData();
+  }, []);
 
   const handleSearch = () => {
     let filtered = [...salesData];
@@ -56,13 +61,20 @@ const SalesDataPage = () => {
     // Filter by product name
     if (searchText) {
       filtered = filtered.filter(
-        item => item.product.toLowerCase().includes(searchText.toLowerCase())
+        item => item.product_name.toLowerCase().includes(searchText.toLowerCase())
       );
     }
 
-    // Filter by region
-    if (regionFilter) {
-      filtered = filtered.filter(item => item.region === regionFilter);
+    // Filter by store
+    if (storeFilter) {
+      filtered = filtered.filter(item => item.store_id === storeFilter);
+    }
+
+    // Filter by date range
+    if (dateRange[0] && dateRange[1]) {
+      filtered = filtered.filter(item => 
+        dayjs(item.date).isAfter(dateRange[0]) && dayjs(item.date).isBefore(dateRange[1])
+      );
     }
 
     setFilteredData(filtered);
@@ -70,62 +82,82 @@ const SalesDataPage = () => {
 
   const handleReset = () => {
     setSearchText('');
-    setRegionFilter('');
+    setStoreFilter('');
+    setDateRange([null, null]);
     setFilteredData(salesData);
   };
 
-  const regions = Array.from(new Set(salesData.map(item => item.region)));
+  const stores = salesData.length > 0 
+    ? Array.from(new Set(salesData.map(item => item.store_id)))
+    : [];
 
   const columns: ColumnType<SalesRecord>[] = [
     {
-      title: t('Month'),
-      dataIndex: 'month',
-      key: 'month',
-      sorter: (a, b) => {
-        const months = ['January', 'February', 'March', 'April', 'May', 'June', 
-                      'July', 'August', 'September', 'October', 'November', 'December'];
-        return months.indexOf(a.month) - months.indexOf(b.month);
-      }
+      title: t('sales.transactionId'),
+      dataIndex: 'transaction_id',
+      key: 'transaction_id',
+      sorter: (a, b) => a.transaction_id.localeCompare(b.transaction_id),
     },
     {
-      title: t('Product'),
-      dataIndex: 'product',
-      key: 'product',
-      sorter: (a, b) => a.product.localeCompare(b.product),
+      title: t('sales.storeId'),
+      dataIndex: 'store_id',
+      key: 'store_id',
+      filters: stores.map(store => ({ text: store, value: store })),
+      onFilter: (value, record) => record.store_id === value,
     },
     {
-      title: t('Region'),
-      dataIndex: 'region',
-      key: 'region',
-      filters: regions.map(region => ({ text: region, value: region })),
-      onFilter: (value, record) => record.region === value,
+      title: t('sales.date'),
+      dataIndex: 'date',
+      key: 'date',
+      sorter: (a, b) => dayjs(a.date).unix() - dayjs(b.date).unix(),
+      render: (date) => dayjs(date).format('YYYY-MM-DD'),
     },
     {
-      title: t('Units Sold'),
-      dataIndex: 'unitsSold',
-      key: 'unitsSold',
-      sorter: (a, b) => a.unitsSold - b.unitsSold,
+      title: t('sales.productId'),
+      dataIndex: 'product_id',
+      key: 'product_id',
     },
     {
-      title: t('Revenue'),
-      dataIndex: 'revenue',
-      key: 'revenue',
-      render: (revenue) => `$${revenue.toLocaleString()}`,
-      sorter: (a, b) => a.revenue - b.revenue,
+      title: t('sales.productName'),
+      dataIndex: 'product_name',
+      key: 'product_name',
+      sorter: (a, b) => a.product_name.localeCompare(b.product_name),
     },
     {
-      title: t('Cost of Goods'),
-      dataIndex: 'costOfGoods',
-      key: 'costOfGoods',
-      render: (cost) => `$${cost.toLocaleString()}`,
-      sorter: (a, b) => a.costOfGoods - b.costOfGoods,
+      title: t('sales.quantity'),
+      dataIndex: 'quantity',
+      key: 'quantity',
+      sorter: (a, b) => parseInt(a.quantity) - parseInt(b.quantity),
     },
     {
-      title: t('Profit'),
-      dataIndex: 'profit',
-      key: 'profit',
-      render: (profit) => `$${profit.toLocaleString()}`,
-      sorter: (a, b) => a.profit - b.profit,
+      title: t('sales.price'),
+      dataIndex: 'price',
+      key: 'price',
+      render: (price) => `¥${parseInt(price).toLocaleString()}`,
+      sorter: (a, b) => parseInt(a.price) - parseInt(b.price),
+    },
+    {
+      title: t('sales.total_amount'),
+      dataIndex: 'total',
+      key: 'total',
+      render: (total) => `¥${parseInt(total).toLocaleString()}`,
+      sorter: (a, b) => parseInt(a.total) - parseInt(b.total),
+    },
+    {
+      title: t('sales.staffId'),
+      dataIndex: 'staff_id',
+      key: 'staff_id',
+    },
+    {
+      title: t('sales.paymentMethod'),
+      dataIndex: 'payment_method',
+      key: 'payment_method',
+      filters: [
+        { text: 'Cash', value: 'Cash' },
+        { text: 'Credit Card', value: 'Credit Card' },
+        { text: 'Mobile Payment', value: 'Mobile Payment' },
+      ],
+      onFilter: (value, record) => record.payment_method === value,
     },
   ];
 
@@ -149,15 +181,25 @@ const SalesDataPage = () => {
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                {t('sales.region')}
+                {t('sales.storeId')}
               </label>
               <Select
-                placeholder={t('sales.region')}
-                value={regionFilter}
-                onChange={value => setRegionFilter(value)}
+                placeholder={t('sales.storeId')}
+                value={storeFilter}
+                onChange={value => setStoreFilter(value)}
                 allowClear
                 style={{ width: 200 }}
-                options={regions.map(region => ({ value: region, label: region }))}
+                options={stores.map(store => ({ value: store, label: store }))}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                {t('filters.dateRange')}
+              </label>
+              <RangePicker
+                value={dateRange}
+                onChange={(dates) => setDateRange(dates as [dayjs.Dayjs | null, dayjs.Dayjs | null])}
+                className="w-64"
               />
             </div>
             <Space>
@@ -172,13 +214,15 @@ const SalesDataPage = () => {
         <Table
           columns={columns}
           dataSource={filteredData}
-          rowKey="id"
+          rowKey="_id"
+          loading={loading}
           pagination={{
             total: filteredData.length,
             pageSize: 10,
             showSizeChanger: true,
             showTotal: (total) => `${t('sales.total')} ${total} ${t('sales.records')}`,
           }}
+          scroll={{ x: 'max-content' }}
         />
       </div>
     </MasterLayout>

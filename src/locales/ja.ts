@@ -36,7 +36,17 @@ const ja = {
     search: '検索',
     reset: 'リセット',
     total: '合計',
-    records: '件'
+    records: '件',
+    transactionId: '取引ID',
+    storeId: '店舗ID',
+    date: '日付',
+    productId: '商品ID',
+    productName: '商品名',
+    quantity: '数量',
+    price: '価格',
+    total_amount: '合計金額',
+    staffId: 'スタッフID',
+    paymentMethod: '支払方法'
   },
   settings: {
     title: '設定',
