@@ -1,8 +1,24 @@
 import { NextResponse } from 'next/server';
 
+// Type definition for the sales data schema
+interface SalesDataSchema {
+  _id: string;
+  Transaction_ID: string;
+  Date: string;
+  SKU_ID: string;
+  Store_ID: string;
+  Store_Name: string;
+  Teller_ID: string;
+  Teller_Name: string;
+  Original_Cost: number;
+  Sold_Cost: number;
+  Quantity_Sold: number;
+  Payment_Method: string;
+}
+
 export async function GET() {
   try {
-    // Use Docker host.docker.internal for container-to-container communication
+    // Use host.docker.internal for container-to-container communication
     const endpoint = 'http://host.docker.internal:3001/api/pos/sales/fetch';
     
     console.log('Server-side API proxy fetching from:', endpoint);
@@ -25,11 +41,14 @@ export async function GET() {
       throw new Error(`Failed to fetch data: ${response.status} ${response.statusText}`);
     }
 
-    const data = await response.json();
+    const rawData = await response.json();
     console.log('Successfully fetched data from API');
     
+    // Simply pass through the data since the API already returns in the correct format
+    // No transformation needed as the backend already returns the data in the required format
+    
     // Return the data with correct CORS headers
-    return NextResponse.json(data, {
+    return NextResponse.json(rawData, {
       status: 200,
       headers: {
         'Content-Type': 'application/json',

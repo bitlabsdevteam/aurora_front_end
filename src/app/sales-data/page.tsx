@@ -12,16 +12,17 @@ const { RangePicker } = DatePicker;
 
 interface SalesRecord {
   _id: string;
-  transaction_id: string;
-  store_id: string;
-  date: string;
-  product_id: string;
-  product_name: string;
-  quantity: string;
-  price: string;
-  total: string;
-  staff_id: string;
-  payment_method: string;
+  Transaction_ID: string;
+  Store_ID: string;
+  Store_Name: string;
+  Date: string;
+  SKU_ID: string;
+  Teller_ID: string;
+  Teller_Name: string;
+  Original_Cost: number;
+  Sold_Cost: number;
+  Quantity_Sold: number;
+  Payment_Method: string;
 }
 
 const SalesDataPage = () => {
@@ -81,19 +82,19 @@ const SalesDataPage = () => {
     // Filter by product name
     if (searchText) {
       filtered = filtered.filter(
-        item => item.product_name.toLowerCase().includes(searchText.toLowerCase())
+        item => (item.SKU_ID || '').toLowerCase().includes(searchText.toLowerCase())
       );
     }
 
     // Filter by store
     if (storeFilter) {
-      filtered = filtered.filter(item => item.store_id === storeFilter);
+      filtered = filtered.filter(item => item.Store_ID === storeFilter);
     }
 
     // Filter by date range
     if (dateRange[0] && dateRange[1]) {
       filtered = filtered.filter(item => 
-        dayjs(item.date).isAfter(dateRange[0]) && dayjs(item.date).isBefore(dateRange[1])
+        dayjs(item.Date).isAfter(dateRange[0]) && dayjs(item.Date).isBefore(dateRange[1])
       );
     }
 
@@ -108,76 +109,81 @@ const SalesDataPage = () => {
   };
 
   const stores = salesData.length > 0 
-    ? Array.from(new Set(salesData.map(item => item.store_id)))
+    ? Array.from(new Set(salesData.map(item => item.Store_ID)))
     : [];
 
   const columns: ColumnType<SalesRecord>[] = [
     {
       title: t('sales.transactionId'),
-      dataIndex: 'transaction_id',
+      dataIndex: 'Transaction_ID',
       key: 'transaction_id',
-      sorter: (a, b) => a.transaction_id.localeCompare(b.transaction_id),
+      sorter: (a, b) => (a.Transaction_ID || '').localeCompare(b.Transaction_ID || ''),
     },
     {
       title: t('sales.storeId'),
-      dataIndex: 'store_id',
+      dataIndex: 'Store_ID',
       key: 'store_id',
       filters: stores.map(store => ({ text: store, value: store })),
-      onFilter: (value, record) => record.store_id === value,
+      onFilter: (value, record) => record.Store_ID === value,
     },
     {
       title: t('sales.date'),
-      dataIndex: 'date',
+      dataIndex: 'Date',
       key: 'date',
-      sorter: (a, b) => dayjs(a.date).unix() - dayjs(b.date).unix(),
+      sorter: (a, b) => dayjs(a.Date || '').unix() - dayjs(b.Date || '').unix(),
       render: (date) => dayjs(date).format('YYYY-MM-DD'),
     },
     {
       title: t('sales.productId'),
-      dataIndex: 'product_id',
+      dataIndex: 'SKU_ID',
       key: 'product_id',
     },
     {
-      title: t('sales.productName'),
-      dataIndex: 'product_name',
-      key: 'product_name',
-      sorter: (a, b) => a.product_name.localeCompare(b.product_name),
+      title: t('sales.storeName'),
+      dataIndex: 'Store_Name',
+      key: 'store_name',
+      sorter: (a, b) => (a.Store_Name || '').localeCompare(b.Store_Name || ''),
     },
     {
       title: t('sales.quantity'),
-      dataIndex: 'quantity',
+      dataIndex: 'Quantity_Sold',
       key: 'quantity',
-      sorter: (a, b) => parseInt(a.quantity) - parseInt(b.quantity),
+      sorter: (a, b) => (a.Quantity_Sold || 0) - (b.Quantity_Sold || 0),
     },
     {
-      title: t('sales.price'),
-      dataIndex: 'price',
-      key: 'price',
-      render: (price) => `¥${parseInt(price).toLocaleString()}`,
-      sorter: (a, b) => parseInt(a.price) - parseInt(b.price),
+      title: t('sales.originalCost'),
+      dataIndex: 'Original_Cost',
+      key: 'original_cost',
+      render: (cost) => isNaN(cost) ? '¥0' : `¥${parseFloat(cost).toLocaleString('ja-JP', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      sorter: (a, b) => (a.Original_Cost || 0) - (b.Original_Cost || 0),
     },
     {
-      title: t('sales.total_amount'),
-      dataIndex: 'total',
-      key: 'total',
-      render: (total) => `¥${parseInt(total).toLocaleString()}`,
-      sorter: (a, b) => parseInt(a.total) - parseInt(b.total),
+      title: t('sales.soldCost'),
+      dataIndex: 'Sold_Cost',
+      key: 'sold_cost',
+      render: (cost) => isNaN(cost) ? '¥0' : `¥${parseFloat(cost).toLocaleString('ja-JP', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
+      sorter: (a, b) => (a.Sold_Cost || 0) - (b.Sold_Cost || 0),
     },
     {
-      title: t('sales.staffId'),
-      dataIndex: 'staff_id',
-      key: 'staff_id',
+      title: t('sales.tellerId'),
+      dataIndex: 'Teller_ID',
+      key: 'teller_id',
+    },
+    {
+      title: t('sales.tellerName'),
+      dataIndex: 'Teller_Name',
+      key: 'teller_name',
     },
     {
       title: t('sales.paymentMethod'),
-      dataIndex: 'payment_method',
+      dataIndex: 'Payment_Method',
       key: 'payment_method',
       filters: [
         { text: 'Cash', value: 'Cash' },
         { text: 'Credit Card', value: 'Credit Card' },
-        { text: 'Mobile Payment', value: 'Mobile Payment' },
+        { text: 'E-money', value: 'E-money' },
       ],
-      onFilter: (value, record) => record.payment_method === value,
+      onFilter: (value, record) => record.Payment_Method === value,
     },
   ];
 
