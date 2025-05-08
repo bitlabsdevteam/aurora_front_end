@@ -13,62 +13,36 @@ interface SalesDataSchema {
   Sold_Cost: number;
 }
 
-// Generate mock data for a specific SKU
-const generateMockSkuSalesData = (skuId: string) => {
+// Mock data generator for empty responses
+function generateMockData(skuId: string): SalesDataSchema[] {
   const mockData: SalesDataSchema[] = [];
-  const now = new Date();
+  const today = new Date();
   
-  // Define specific prices and patterns based on SKU
-  let basePrice = 0;
-  let stockQuantity = 0;
-  
-  // Set price based on SKU pattern
-  if (skuId.includes('SK')) basePrice = 40.14;
-  else if (skuId.includes('SHR')) basePrice = 125.05;
-  else if (skuId.includes('JKT')) basePrice = 215.99;
-  else if (skuId === 'K-SH-M-BLU-STR-COT-25S') basePrice = 23.99;
-  else basePrice = 50.00; // Default price
-  
-  // Set date range (past 12 months)
-  const monthCount = 12;
-  
-  // Create monthly data points with realistic patterns
-  for (let i = 0; i < monthCount; i++) {
-    const date = new Date(now);
-    date.setMonth(date.getMonth() - (monthCount - i - 1));
-    const formattedDate = date.toISOString().split('T')[0];
+  // Generate 90 days of mock data
+  for (let i = 0; i < 90; i++) {
+    const date = new Date();
+    date.setDate(today.getDate() - i);
     
-    // Create seasonal pattern with growth trend
-    // Higher sales in months 3, 6, 9 (seasonal peaks)
-    const seasonalFactor = (i % 3 === 0) ? 1.5 : 1.0;
-    // General growth trend
-    const growthFactor = 0.9 + (i * 0.02);
-    
-    // Base quantity with some randomness
-    const baseQuantity = Math.floor(10 * seasonalFactor * growthFactor);
-    // Add randomness
-    const randomVariation = Math.floor(Math.random() * 5) - 2;
-    const quantity = Math.max(1, baseQuantity + randomVariation);
-    
-    // Add some random variation to price (sales, discounts)
-    const priceVariation = 0.95 + (Math.random() * 0.1);
-    const price = basePrice * priceVariation;
+    // Create some variation in the data
+    const quantity = Math.floor(Math.random() * 20) + 5; // Between 5 and 25
+    const originalCost = Math.floor(Math.random() * 5000) + 2000; // Between 2000 and 7000
+    const soldCost = originalCost * (1 + Math.random() * 0.5); // Between 100% and 150% of original cost
     
     mockData.push({
-      _id: `MOCK${i}`,
-      Transaction_ID: `TR${10000 + i}`,
-      Date: formattedDate,
+      _id: `mock-${date.toISOString()}-${i}`,
+      Transaction_ID: `MOCK-TX-${date.getFullYear()}${date.getMonth()+1}${date.getDate()}-${i}`,
+      Date: date.toISOString().split('T')[0],
       SKU_ID: skuId,
-      Store_ID: 'ST001',
-      Store_Name: 'Tokyo Flagship Store',
+      Store_ID: `ST-${Math.floor(Math.random() * 10) + 1}`,
+      Store_Name: `Store ${Math.floor(Math.random() * 5) + 1}`,
       Quantity_Sold: quantity,
-      Original_Cost: price,
-      Sold_Cost: price * quantity
+      Original_Cost: originalCost,
+      Sold_Cost: soldCost
     });
   }
   
   return mockData;
-};
+}
 
 export async function GET(request: Request) {
   try {
@@ -104,9 +78,8 @@ export async function GET(request: Request) {
         const errorBody = await response.text();
         console.error('Error Response:', errorBody);
         
-        // Instead of throwing an error, fall back to mock data
-        console.log(`Falling back to mock data for SKU ${skuId} due to API error`);
-        const mockData = generateMockSkuSalesData(skuId);
+        console.log('Generating mock data due to API error');
+        const mockData = generateMockData(skuId);
         return NextResponse.json(mockData, {
           status: 200,
           headers: {
@@ -120,8 +93,8 @@ export async function GET(request: Request) {
       
       // Check if the data is empty or invalid
       if (!rawData || !Array.isArray(rawData) || rawData.length === 0) {
-        console.log('API returned empty or invalid data, falling back to mock data');
-        const mockData = generateMockSkuSalesData(skuId);
+        console.log('API returned empty or invalid data, using mock data');
+        const mockData = generateMockData(skuId);
         return NextResponse.json(mockData, {
           status: 200,
           headers: {
@@ -140,9 +113,8 @@ export async function GET(request: Request) {
     } catch (error) {
       console.error('Error fetching from actual API:', error);
       
-      // Fall back to mock data
-      console.log(`Falling back to mock data for SKU ${skuId} due to error:`, error instanceof Error ? error.message : 'Unknown error');
-      const mockData = generateMockSkuSalesData(skuId);
+      console.log('Generating mock data due to API error');
+      const mockData = generateMockData(skuId);
       return NextResponse.json(mockData, {
         status: 200,
         headers: {

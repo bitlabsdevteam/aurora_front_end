@@ -1,27 +1,16 @@
 import { NextResponse } from 'next/server';
 
-// Type definition for the sales data schema
-interface SalesDataSchema {
-  _id: string;
-  Transaction_ID: string;
-  Date: string;
-  SKU_ID: string;
-  Store_ID: string;
-  Store_Name: string;
-  Teller_ID: string;
-  Teller_Name: string;
-  Original_Cost: number;
-  Sold_Cost: number;
-  Quantity_Sold: number;
-  Payment_Method: string;
+// Interface for the API response
+interface SkuIdResponse {
+  sku_id: string;
 }
 
 export async function GET() {
   try {
     // Use host.docker.internal for container-to-container communication
-    const endpoint = 'http://host.docker.internal:3001/api/pos/sales/fetch';
+    const endpoint = 'http://host.docker.internal:3001/api/skus/fetch';
     
-    console.log('Server-side API proxy fetching from:', endpoint);
+    console.log('Server-side API proxy fetching SKU IDs from:', endpoint);
     
     try {
       const response = await fetch(endpoint, {
@@ -29,11 +18,9 @@ export async function GET() {
         headers: {
           'Content-Type': 'application/json',
         },
-        // Updated body structure as specified
         body: JSON.stringify({
           "additionalProp1": {}
         }),
-        // Increase timeout to allow more time for the API to respond
         signal: AbortSignal.timeout(10000) // 10 second timeout
       });
 
@@ -49,12 +36,12 @@ export async function GET() {
         );
       }
 
-      const rawData = await response.json();
-      console.log('Successfully fetched real data from API');
+      const data = await response.json();
+      console.log('Successfully fetched real SKUs data from API');
       
-      // Check if the data is empty or invalid
-      if (!rawData || !Array.isArray(rawData) || rawData.length === 0) {
-        console.log('API returned empty or invalid data');
+      // Check if data is empty or invalid
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        console.log('API returned empty or invalid SKU data');
         // Return empty array
         return NextResponse.json([], {
           status: 200,
@@ -64,8 +51,13 @@ export async function GET() {
         });
       }
       
-      // Return the data with correct CORS headers
-      return NextResponse.json(rawData, {
+      // Extract only the SKU IDs from the data
+      const skuIds = Array.isArray(data) ? data.map((item: any) => ({
+        sku_id: item.SKU || item.sku_id || ''
+      })).filter((item: SkuIdResponse) => item.sku_id !== '') : [];
+      
+      // Return the SKU IDs with correct CORS headers
+      return NextResponse.json(skuIds, {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
@@ -81,7 +73,7 @@ export async function GET() {
       );
     }
   } catch (error) {
-    console.error('Error in sales-data API route:', error);
+    console.error('Error in SKU IDs API route:', error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }

@@ -13,6 +13,7 @@ const ja = {
     selectSKU: 'SKUを選択',
     dateRange: '日付範囲',
     generateForecast: '予測を生成',
+    forecast: '予測',
     productName: '製品名',
     category: 'カテゴリー',
     currentStock: '現在の在庫',
@@ -34,7 +35,8 @@ const ja = {
     dailyView: '日次表示',
     monthlyView: '月次表示',
     monthlySales: '月間販売数量',
-    monthlyRevenue: '月間売上'
+    monthlyRevenue: '月間売上',
+    selectedSKU: '選択したSKU'
   },
   menu: {
     dashboard: 'ダッシュボード',

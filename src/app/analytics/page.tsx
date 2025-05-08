@@ -23,6 +23,10 @@ interface SalesRecord {
   Sold_Cost: number;
 }
 
+interface SkuIdResponse {
+  sku_id: string;
+}
+
 interface ProductSchema {
   _id: string;
   sku_id: string;
@@ -52,13 +56,12 @@ const Analytics = () => {
   const { t } = useLocale();
   const [selectedSKU, setSelectedSKU] = useState<string>('');
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
-  const [skus, setSkus] = useState<ProductSchema[]>([]);
+  const [skus, setSkus] = useState<SkuIdResponse[]>([]);
   const [salesData, setSalesData] = useState<SalesRecord[]>([]);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
   const [skuLoading, setSkuLoading] = useState<boolean>(true);
-  const [selectedProduct, setSelectedProduct] = useState<ProductSchema | null>(null);
   const [chartType, setChartType] = useState<'composed' | 'line' | 'bar'>('composed');
   const [growthStats, setGrowthStats] = useState<{
     quantityGrowth: number;
@@ -72,7 +75,7 @@ const Analytics = () => {
     const fetchSKUs = async () => {
       try {
         setSkuLoading(true);
-        const response = await fetch('/api/skus');
+        const response = await fetch('/api/skus/ids');
         if (!response.ok) {
           throw new Error(`Failed to fetch SKUs: ${response.status}`);
         }
@@ -92,8 +95,6 @@ const Analytics = () => {
   // Handle SKU selection
   const handleSKUChange = (value: string) => {
     setSelectedSKU(value);
-    const product = skus.find(sku => sku.sku_id === value);
-    setSelectedProduct(product || null);
     
     // Auto-fetch data when SKU is selected
     if (value) {
@@ -336,7 +337,7 @@ const Analytics = () => {
               >
                 {skus.map(sku => (
                   <Option key={sku.sku_id} value={sku.sku_id}>
-                    {sku.sku_id} - {sku.product_name}
+                    {sku.sku_id}
                   </Option>
                 ))}
               </Select>
@@ -360,34 +361,17 @@ const Analytics = () => {
                 disabled={!selectedSKU}
                 className="bg-[#4745D0]"
               >
-                {t('analytics.generateForecast')}
+                {t('analytics.forecast')}
               </Button>
             </div>
           </div>
 
-          {selectedProduct && (
+          {selectedSKU && (
             <div className="mb-4 p-3 bg-gray-50 rounded-md">
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
                 <div>
-                  <Text className="text-gray-500 text-sm">{t('analytics.productName')}</Text>
-                  <Text className="block font-medium">{selectedProduct.product_name}</Text>
-                </div>
-                <div>
-                  <Text className="text-gray-500 text-sm">{t('analytics.category')}</Text>
-                  <Text className="block font-medium">{selectedProduct.category}</Text>
-                </div>
-                <div>
-                  <Text className="text-gray-500 text-sm">{t('analytics.currentStock')}</Text>
-                  <Text className="block font-medium">{selectedProduct.stock_quantity}</Text>
-                </div>
-                <div>
-                  <Text className="text-gray-500 text-sm">{t('analytics.price')}</Text>
-                  <Text className="block font-medium">
-                    ¥{selectedProduct.price.toLocaleString('ja-JP', {
-                      minimumFractionDigits: 2,
-                      maximumFractionDigits: 2
-                    })}
-                  </Text>
+                  <Text className="text-gray-500 text-sm">{t('analytics.selectedSKU')}</Text>
+                  <Text className="block font-medium">{selectedSKU}</Text>
                 </div>
               </div>
             </div>

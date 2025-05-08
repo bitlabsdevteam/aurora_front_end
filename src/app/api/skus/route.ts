@@ -27,87 +27,6 @@ interface ProductSchema {
   status: string;
 }
 
-// Generate mock SKU data for testing when API is unavailable
-const generateMockSkuData = (): ProductSchema[] => {
-  return [
-    {
-      _id: "sku123",
-      sku_id: "M-SK-34-GRA-GPH-FLE-25S",
-      product_name: "Graphic Fleece Skirt",
-      brand: "Aurora Fashion",
-      category: "Skirt",
-      size: "25",
-      color: "Graphite",
-      sex: "M",
-      pattern: "Graphic",
-      fabric: "Fleece",
-      fit: "Regular",
-      season: "Spring/Summer",
-      price: 40.14,
-      stock_quantity: 96,
-      launch_date: "2023-03-15",
-      eco_tag: "Eco-friendly",
-      country_origin: "Japan",
-      upc: "123456789012",
-      style_collection: "Spring 2023",
-      supplier: "Fabric Co. Ltd.",
-      care_instructions: "Machine wash cold, tumble dry low",
-      image_url: "/images/skirt.jpg",
-      status: "在庫あり"
-    },
-    {
-      _id: "sku456",
-      sku_id: "M-SHR-M-CRE-STR-SAT-25F",
-      product_name: "Stripe Satin Shorts",
-      brand: "Aurora Fashion",
-      category: "Shorts",
-      size: "M",
-      color: "Cream",
-      sex: "M",
-      pattern: "Stripe",
-      fabric: "Satin",
-      fit: "Regular",
-      season: "Fall",
-      price: 125.05,
-      stock_quantity: 90,
-      launch_date: "2023-08-01",
-      eco_tag: "Sustainable",
-      country_origin: "Italy",
-      upc: "789012345678",
-      style_collection: "Fall 2023",
-      supplier: "Luxury Fabrics Inc.",
-      care_instructions: "Dry clean only",
-      image_url: "/images/shorts.jpg",
-      status: "在庫あり"
-    },
-    {
-      _id: "sku789",
-      sku_id: "M-JKT-L-BLK-PLN-LEA-30W",
-      product_name: "Plain Leather Jacket",
-      brand: "Aurora Fashion",
-      category: "Jacket",
-      size: "L",
-      color: "Black",
-      sex: "M",
-      pattern: "Plain",
-      fabric: "Leather",
-      fit: "Regular",
-      season: "Winter",
-      price: 215.99,
-      stock_quantity: 45,
-      launch_date: "2023-11-15",
-      eco_tag: "Premium",
-      country_origin: "Italy",
-      upc: "345678901234",
-      style_collection: "Winter 2023",
-      supplier: "Italian Leather Co.",
-      care_instructions: "Professional leather cleaning only",
-      image_url: "/images/jacket.jpg",
-      status: "在庫あり"
-    }
-  ];
-};
-
 export async function GET() {
   try {
     // Use host.docker.internal for container-to-container communication
@@ -134,15 +53,11 @@ export async function GET() {
         const errorBody = await response.text();
         console.error('Error Response:', errorBody);
         
-        // Instead of throwing an error, fall back to mock data
-        console.log('Falling back to mock SKU data due to API error');
-        const mockData = generateMockSkuData();
-        return NextResponse.json(mockData, {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json',
-          },
-        });
+        // Return an error response
+        return NextResponse.json(
+          { error: `API returned status ${response.status}` },
+          { status: 500 }
+        );
       }
 
       const data = await response.json();
@@ -150,9 +65,9 @@ export async function GET() {
       
       // Check if data is empty or invalid
       if (!data || !Array.isArray(data) || data.length === 0) {
-        console.log('API returned empty or invalid SKU data, falling back to mock data');
-        const mockData = generateMockSkuData();
-        return NextResponse.json(mockData, {
+        console.log('API returned empty or invalid SKU data');
+        // Return empty array
+        return NextResponse.json([], {
           status: 200,
           headers: {
             'Content-Type': 'application/json',
@@ -200,15 +115,11 @@ export async function GET() {
     } catch (error) {
       console.error('Error fetching from actual API:', error);
       
-      // Fall back to mock data
-      console.log('Falling back to mock SKU data due to error:', error instanceof Error ? error.message : 'Unknown error');
-      const mockData = generateMockSkuData();
-      return NextResponse.json(mockData, {
-        status: 200,
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+      // Return an error response
+      return NextResponse.json(
+        { error: error instanceof Error ? error.message : 'Unknown error' },
+        { status: 500 }
+      );
     }
   } catch (error) {
     console.error('Error in SKUs API route:', error);

@@ -13,6 +13,7 @@ const en = {
     selectSKU: 'Select SKU',
     dateRange: 'Date Range',
     generateForecast: 'Generate Forecast',
+    forecast: 'Forecast',
     productName: 'Product Name',
     category: 'Category',
     currentStock: 'Current Stock',
@@ -34,7 +35,8 @@ const en = {
     dailyView: 'Daily View',
     monthlyView: 'Monthly View',
     monthlySales: 'Monthly Quantity Sold',
-    monthlyRevenue: 'Monthly Revenue'
+    monthlyRevenue: 'Monthly Revenue',
+    selectedSKU: 'Selected SKU'
   },
   menu: {
     dashboard: 'Dashboard',
