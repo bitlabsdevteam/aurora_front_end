@@ -14,6 +14,8 @@
     "@types/js-cookie": "^3.0.6",
     "@types/uuid": "^10.0.0",
     "antd": "^5.24.8",
+    "graphql": "^16.11.0",
+    "graphql-request": "^7.1.2",
     "js-cookie": "^3.0.5",
     "lucide-react": "^0.503.0",
     "next": "15.3.1",

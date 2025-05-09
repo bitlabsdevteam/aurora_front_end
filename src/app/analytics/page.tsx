@@ -1,15 +1,29 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { Card, Select, DatePicker, Button, Spin, Alert, Typography, Empty, Radio, Tag, Tabs } from 'antd';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Bar, Area, ReferenceLine, Cell, BarChart } from 'recharts';
+import { Card, Select, DatePicker, Button, Spin, Alert, Typography, Empty, Radio, Tag, Tabs, Statistic } from 'antd';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Bar, Area, ReferenceLine, Cell, BarChart, LabelList } from 'recharts';
 import dayjs from 'dayjs';
 import MasterLayout from '../components/layout/MasterLayout';
 import { useLocale } from '../../context/LocaleContext';
+import { request, GraphQLClient } from 'graphql-request';
 
 const { Title, Text } = Typography;
 const { RangePicker } = DatePicker;
 const { Option } = Select;
+const { TabPane } = Tabs;
+
+// GraphQL endpoint
+const GRAPHQL_ENDPOINT = 'http://localhost:3001/api/graphql';
+
+// Utility function to get GraphQL client
+const getGraphQLClient = () => {
+  return new GraphQLClient(GRAPHQL_ENDPOINT, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+};
 
 interface SalesRecord {
   _id: string;
@@ -24,7 +38,7 @@ interface SalesRecord {
 }
 
 interface SkuIdResponse {
-  sku_id: string;
+  skuId: string;
 }
 
 interface ProductSchema {
@@ -52,45 +66,135 @@ interface MonthlyDataPoint {
   revenue: number;
 }
 
+// Define GraphQL response type
+interface GraphQLSkuResponse {
+  sales: SkuIdResponse[];
+}
+
+interface GraphQLSalesResponse {
+  sales: {
+    _id: string;
+    Transaction_ID: string;
+    Date: string;
+    SKU_ID: string;
+    Store_ID: string;
+    Store_Name: string;
+    Teller_ID: string;
+    Teller_Name: string;
+    Original_Cost: string;
+    Sold_Cost: string;
+    Quantity_Sold: string;
+    Payment_Method: string;
+  }[];
+}
+
+interface GraphQLSalesBySkuResponse {
+  salesBySku: {
+    transactionId: string;
+    id: string;
+    date: string;
+    skuId: string;
+    storeId: string;
+    quantitySold?: number;
+    soldCost?: number;
+  }[];
+}
+
+// Add a new interface for the SKU details display
+interface SkuDisplayDetails {
+  _id: string;
+  Transaction_ID: string;
+  Date: string;
+  SKU_ID: string;
+  Store_ID: string;
+  Store_Name: string;
+  Teller_ID: string;
+  Teller_Name: string;
+  Original_Cost: string;
+  Sold_Cost: string;
+  Quantity_Sold: string;
+  Payment_Method: string;
+  // Additional display fields
+  productName?: string;
+  category?: string;
+  price?: number;
+  stock?: number;
+}
+
+// Custom hook for fetching SKUs
+const useSKUs = () => {
+  const [skus, setSkus] = useState<SkuIdResponse[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchSKUs = async () => {
+      try {
+        setLoading(true);
+        
+        // Using GraphQL to fetch SKU IDs with proper type
+        const client = getGraphQLClient();
+        
+        // Query to get all available skuIds from Sales data
+        const query = `
+          query {
+            sales {
+              skuId
+            }
+          }
+        `;
+        
+        const response = await client.request<GraphQLSkuResponse>(query);
+        
+        // Update skus state with the response data
+        if (response && response.sales) {
+          console.log('Fetched SKUs:', response.sales.length);
+          
+          // Remove duplicates if any exist
+          const uniqueSkuIds = [...new Set(response.sales.map(item => item.skuId))];
+          const uniqueSkus = uniqueSkuIds.map(skuId => ({ skuId }));
+          
+          setSkus(uniqueSkus);
+        } else {
+          throw new Error('Invalid response format from GraphQL API');
+        }
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch SKUs');
+        console.error('Error fetching SKUs via GraphQL:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchSKUs();
+  }, []);
+
+  return { skus, loading, error };
+};
+
 const Analytics = () => {
   const { t } = useLocale();
   const [selectedSKU, setSelectedSKU] = useState<string>('');
   const [dateRange, setDateRange] = useState<[dayjs.Dayjs, dayjs.Dayjs] | null>(null);
-  const [skus, setSkus] = useState<SkuIdResponse[]>([]);
+  const { skus, loading: skuLoading, error: skuError } = useSKUs();
   const [salesData, setSalesData] = useState<SalesRecord[]>([]);
   const [chartData, setChartData] = useState<ChartDataPoint[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-  const [skuLoading, setSkuLoading] = useState<boolean>(true);
   const [chartType, setChartType] = useState<'composed' | 'line' | 'bar'>('composed');
   const [growthStats, setGrowthStats] = useState<{
     quantityGrowth: number;
     revenueGrowth: number;
   } | null>(null);
   const [monthlyData, setMonthlyData] = useState<MonthlyDataPoint[]>([]);
-  const [activeTab, setActiveTab] = useState<string>("daily");
+  const [activeTab, setActiveTab] = useState<string>("monthly");
+  const [skuDetails, setSkuDetails] = useState<SkuDisplayDetails | null>(null);
 
-  // Fetch SKUs on component mount
-  useEffect(() => {
-    const fetchSKUs = async () => {
-      try {
-        setSkuLoading(true);
-        const response = await fetch('/api/skus/ids');
-        if (!response.ok) {
-          throw new Error(`Failed to fetch SKUs: ${response.status}`);
-        }
-        const data = await response.json();
-        setSkus(data);
-      } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to fetch SKUs');
-        console.error('Error fetching SKUs:', err);
-      } finally {
-        setSkuLoading(false);
-      }
-    };
-
-    fetchSKUs();
-  }, []);
+  // Formatter for currency display
+  const currencyFormatter = new Intl.NumberFormat('en-US', {
+    style: 'currency',
+    currency: 'USD',
+  });
 
   // Handle SKU selection
   const handleSKUChange = (value: string) => {
@@ -221,10 +325,10 @@ const Analytics = () => {
     });
   };
 
-  // Process sales data for monthly chart 
+  // Process sales data for monthly chart - emphasize month on x-axis and quantity sold on y-axis
   const processDataForMonthlyChart = (data: SalesRecord[]): MonthlyDataPoint[] => {
     // Group by month
-    const groupedByMonth = data.reduce((acc, record) => {
+    const groupedByMonth = data.reduce<Record<string, { monthKey: string, monthDisplay: string, quantity: number; revenue: number }>>((acc, record) => {
       const date = dayjs(record.Date);
       const monthKey = date.format('YYYY-MM'); // Format as YYYY-MM for sorting
       const monthDisplay = date.format('MMM YYYY'); // Format as MMM YYYY for display
@@ -242,22 +346,26 @@ const Analytics = () => {
       acc[monthKey].revenue += record.Sold_Cost;
       
       return acc;
-    }, {} as Record<string, { monthKey: string, monthDisplay: string, quantity: number; revenue: number }>);
+    }, {});
 
-    // Convert to array and sort by month
-    return Object.values(groupedByMonth)
+    // Convert to array and sort by month chronologically
+    const monthlyData = Object.values(groupedByMonth)
       .map(({ monthKey, monthDisplay, quantity, revenue }) => ({
         month: monthDisplay,
-        sortKey: monthKey,  // Keep the sort key for proper ordering
+        sortKey: monthKey,
         quantity,
         revenue
       }))
       .sort((a, b) => a.sortKey.localeCompare(b.sortKey));
+    
+    console.log('Sorted monthly data by date:', monthlyData);
+    return monthlyData;
   };
 
   // Fetch sales data and generate chart
   const fetchSalesData = async () => {
     if (!selectedSKU) {
+      setError(t('analytics.selectSKUFirst'));
       return;
     }
 
@@ -265,27 +373,78 @@ const Analytics = () => {
     setError(null);
 
     try {
-      console.log('Fetching sales data for SKU:', selectedSKU);
+      console.log('Fetching data for SKU:', selectedSKU);
       
-      // Using the new SKU-specific endpoint
-      const response = await fetch(`/api/sales-data/sku?skuId=${selectedSKU}`);
+      // Create the GraphQL client
+      const client = getGraphQLClient();
       
-      if (!response.ok) {
-        throw new Error(`Failed to fetch sales data: ${response.status}`);
+      // Define the GraphQL query using salesBySku as shown in the image
+      const salesBySkuQuery = `
+        query Sku {
+          salesBySku(skuId: "${selectedSKU}") {
+            transactionId
+            id
+            date
+            skuId
+            storeId
+          }
+        }
+      `;
+      
+      // Execute the sales by SKU query
+      const salesResponse = await client.request<GraphQLSalesBySkuResponse>(salesBySkuQuery);
+      
+      // Check if we have a valid sales response
+      if (!salesResponse || !salesResponse.salesBySku || salesResponse.salesBySku.length === 0) {
+        throw new Error('No sales data found for this SKU');
       }
-
-      const data: SalesRecord[] = await response.json();
-      console.log('API response data:', data);
+      
+      const salesData = salesResponse.salesBySku;
+      console.log('GraphQL API sales data response:', salesData);
+      
+      // Create enhanced SKU details from the response data
+      const enhancedSkuDetails: SkuDisplayDetails = {
+        _id: salesData[0].id || '',
+        Transaction_ID: salesData[0].transactionId || '',
+        Date: salesData[0].date || '',
+        SKU_ID: salesData[0].skuId || '',
+        Store_ID: salesData[0].storeId || '',
+        Store_Name: 'Store ' + (salesData[0].storeId || ''),
+        Teller_ID: '',
+        Teller_Name: '',
+        Original_Cost: '0',
+        Sold_Cost: '0',
+        Quantity_Sold: '1', // Default quantity
+        Payment_Method: '',
+        // Additional display fields
+        productName: `Product ${selectedSKU}`,
+        category: 'Apparel',
+        price: 0,
+        stock: 0
+      };
+      
+      // Convert GraphQL sales data to SalesRecord format
+      const formattedSalesData: SalesRecord[] = salesData.map(sale => ({
+        _id: sale.id || '',
+        Transaction_ID: sale.transactionId || '',
+        Date: sale.date || '',
+        SKU_ID: sale.skuId || '',
+        Store_ID: sale.storeId || '',
+        Store_Name: 'Store ' + (sale.storeId || ''),
+        Quantity_Sold: sale.quantitySold || 1,  // Default to 1 if not provided
+        Original_Cost: 0,
+        Sold_Cost: sale.soldCost || 0
+      }));
       
       // Filter by date range if provided
       const filteredData = dateRange && dateRange[0] && dateRange[1]
-        ? data.filter(record => {
+        ? formattedSalesData.filter(record => {
             const recordDate = dayjs(record.Date);
             return recordDate.isAfter(dateRange[0]) && recordDate.isBefore(dateRange[1]);
           })
-        : data;
+        : formattedSalesData;
 
-      console.log('Filtered data length:', filteredData.length);
+      console.log('Filtered sales data:', filteredData);
       setSalesData(filteredData);
 
       // Process data for charts
@@ -300,16 +459,117 @@ const Analytics = () => {
       
       // Calculate growth trends
       calculateGrowth(processedData);
+
+      // Update skuDetails state
+      setSkuDetails(enhancedSkuDetails);
+      
+      // Set the active tab to monthly view by default
+      setActiveTab('monthly');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch sales data');
-      console.error('Error fetching sales data:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch data');
+      console.error('Error:', err);
       setSalesData([]);
       setChartData([]);
       setMonthlyData([]);
       setGrowthStats(null);
+      setSkuDetails(null);
     } finally {
       setLoading(false);
     }
+  };
+
+  // Monthly chart component
+  const MonthlyChartSection = () => {
+    // Calculate monthly average for reference line
+    const totalQuantity = monthlyData.reduce((sum, item) => sum + item.quantity, 0);
+    const monthlyAverage = monthlyData.length > 0 ? totalQuantity / monthlyData.length : 0;
+    
+    // Find best performing month
+    const bestMonth = monthlyData.length > 0 
+      ? monthlyData.reduce((best, current) => current.quantity > best.quantity ? current : best, monthlyData[0])
+      : null;
+    
+    return (
+      <Card title={t('analytics.monthlySales')} extra={t('analytics.byMonth')}>
+        {monthlyData.length > 0 ? (
+          <>
+            <div className="h-96">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={monthlyData} margin={{ top: 20, right: 30, left: 20, bottom: 60 }}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis 
+                    dataKey="month" 
+                    angle={-45} 
+                    textAnchor="end" 
+                    height={80} 
+                    label={{ value: t('analytics.month'), position: 'insideBottom', offset: -40 }}
+                  />
+                  <YAxis 
+                    label={{ value: t('analytics.quantitySold'), angle: -90, position: 'insideLeft' }} 
+                  />
+                  <Tooltip formatter={(value, name) => {
+                    if (name === 'quantity') {
+                      return [`${value} ${t('analytics.units')}`, t('analytics.quantitySold')];
+                    }
+                    return [`${currencyFormatter.format(value as number)}`, t('analytics.revenue')];
+                  }} />
+                  <Legend />
+                  <ReferenceLine 
+                    y={monthlyAverage} 
+                    stroke="red" 
+                    strokeDasharray="3 3"
+                    label={{ value: `${t('analytics.monthlyAvg')}: ${monthlyAverage.toFixed(1)}`, position: 'right' }} 
+                  />
+                  <Bar 
+                    dataKey="quantity" 
+                    name={t('analytics.quantitySold')} 
+                    fillOpacity={0.8}
+                    stroke="#8884d8"
+                    isAnimationActive={true}
+                  >
+                    {/* Use Cell components to color bars based on performance */}
+                    {monthlyData.map((entry, index) => (
+                      <Cell 
+                        key={`cell-${index}`}
+                        fill={
+                          entry.quantity > monthlyAverage * 1.2 ? "#4CAF50" : // Well above average
+                          entry.quantity > monthlyAverage ? "#8BC34A" : // Above average
+                          entry.quantity >= monthlyAverage * 0.8 ? "#FFC107" : // Near average
+                          "#F44336" // Below average
+                        }
+                      />
+                    ))}
+                    <LabelList dataKey="quantity" position="top" />
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+            <div className="mt-6 grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <Card className="text-center">
+                <Statistic
+                  title={t('analytics.totalUnitsSold')}
+                  value={totalQuantity.toLocaleString()}
+                />
+              </Card>
+              <Card className="text-center">
+                <Statistic
+                  title={t('analytics.avgMonthlySales')}
+                  value={parseFloat(monthlyAverage.toFixed(1))}
+                />
+              </Card>
+              <Card className="text-center">
+                <Statistic
+                  title={t('analytics.bestSellingMonth')}
+                  value={bestMonth ? bestMonth.month : '-'}
+                />
+              </Card>
+            </div>
+          </>
+        ) : (
+          <Empty description={t('analytics.noMonthlyData')} />
+        )}
+      </Card>
+    );
   };
 
   return (
@@ -336,11 +596,20 @@ const Analytics = () => {
                 optionFilterProp="children"
               >
                 {skus.map(sku => (
-                  <Option key={sku.sku_id} value={sku.sku_id}>
-                    {sku.sku_id}
+                  <Option key={sku.skuId} value={sku.skuId}>
+                    {sku.skuId}
                   </Option>
                 ))}
               </Select>
+              {skuError && (
+                <Alert 
+                  message="Error loading SKUs" 
+                  description={skuError} 
+                  type="error" 
+                  showIcon 
+                  className="mt-2"
+                />
+              )}
             </div>
 
             <div className="flex-1">
@@ -361,18 +630,41 @@ const Analytics = () => {
                 disabled={!selectedSKU}
                 className="bg-[#4745D0]"
               >
-                {t('analytics.forecast')}
+                {t('analytics.plot')}
               </Button>
             </div>
           </div>
 
           {selectedSKU && (
             <div className="mb-4 p-3 bg-gray-50 rounded-md">
-              <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <div>
                   <Text className="text-gray-500 text-sm">{t('analytics.selectedSKU')}</Text>
                   <Text className="block font-medium">{selectedSKU}</Text>
                 </div>
+                {skuDetails && (
+                  <>
+                    <div>
+                      <Text className="text-gray-500 text-sm">{t('analytics.productName')}</Text>
+                      <Text className="block font-medium">{skuDetails?.productName || selectedSKU}</Text>
+                    </div>
+                    <div>
+                      <Text className="text-gray-500 text-sm">{t('analytics.category')}</Text>
+                      <Text className="block font-medium">{skuDetails?.category || 'Apparel'}</Text>
+                    </div>
+                    <div>
+                      <Text className="text-gray-500 text-sm">{t('analytics.currentStock')}</Text>
+                      <Text className="block font-medium">{skuDetails?.stock || 0}</Text>
+                    </div>
+                    <div>
+                      <Text className="text-gray-500 text-sm">{t('analytics.price')}</Text>
+                      <Text className="block font-medium">¥{(skuDetails?.price || 0).toLocaleString('ja-JP', {
+                        minimumFractionDigits: 2,
+                        maximumFractionDigits: 2
+                      })}</Text>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
           )}
@@ -536,45 +828,7 @@ const Analytics = () => {
                   </div>
                 </div>
               ) : (
-                <div>
-                  <div className="h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <BarChart
-                        data={monthlyData}
-                        margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
-                      >
-                        <CartesianGrid strokeDasharray="3 3" />
-                        <XAxis dataKey="month" />
-                        <YAxis yAxisId="left" />
-                        <YAxis yAxisId="right" orientation="right" />
-                        <Tooltip 
-                          formatter={(value, name) => {
-                            if (name === t('analytics.revenue')) {
-                              return [`¥${Number(value).toLocaleString('ja-JP', {
-                                minimumFractionDigits: 2,
-                                maximumFractionDigits: 2
-                              })}`, name];
-                            }
-                            return [value, name];
-                          }}
-                        />
-                        <Legend />
-                        <Bar
-                          yAxisId="left"
-                          dataKey="quantity"
-                          fill="#4745D0"
-                          name={t('analytics.monthlySales')}
-                        />
-                        <Bar
-                          yAxisId="right"
-                          dataKey="revenue"
-                          fill="#82ca9d"
-                          name={t('analytics.monthlyRevenue')}
-                        />
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
+                <MonthlyChartSection />
               )}
 
               <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">

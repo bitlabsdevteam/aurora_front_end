@@ -23,6 +23,7 @@ import {
   ShoppingCart,
   Users,
   ClipboardList,
+  TrendingUp,
 } from 'lucide-react';
 import { useLocale } from '../../../context/LocaleContext';
 
@@ -82,6 +83,11 @@ const MasterLayout = ({ children }: MasterLayoutProps) => {
       key: 'analytics',
       icon: <BarChart2 className="w-4 h-4" />,
       label: t('menu.analytics'),
+    },
+    {
+      key: 'forecast',
+      icon: <TrendingUp className="w-4 h-4" />,
+      label: t('menu.forecast'),
     },
     {
       key: 'products',
