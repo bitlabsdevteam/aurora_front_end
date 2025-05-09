@@ -2,37 +2,40 @@
 
 import { Card, Tooltip, Tag } from 'antd';
 import { Grid } from 'lucide-react';
+import { useLocale } from '../../../context/LocaleContext';
 
 const PatternTrendGraph = () => {
+  const { t } = useLocale();
+
   const patternTrends = [
     { 
-      name: 'Abstract Geo', 
+      name: t('widgets.abstractGeo'), 
       growth: 'high', 
-      categories: ['Tops', 'Dresses', 'Accessories'],
+      categories: [t('widgets.tops'), t('widgets.dresses'), t('widgets.accessories')],
       examples: 'Geometric shapes, abstract puzzles, digital-inspired patterns'
     },
     { 
-      name: 'Micro Florals', 
+      name: t('widgets.microFlorals'), 
       growth: 'high', 
-      categories: ['Dresses', 'Tops', 'Bottoms'],
+      categories: [t('widgets.dresses'), t('widgets.tops'), t('widgets.bottoms')],
       examples: 'Small-scale floral prints, ditsy patterns, vintage-inspired'
     },
     { 
-      name: 'Organic Stripes', 
+      name: t('widgets.organicStripes'), 
       growth: 'medium', 
-      categories: ['Outerwear', 'Tops', 'Accessories'],
+      categories: [t('widgets.outerwear'), t('widgets.tops'), t('widgets.accessories')],
       examples: 'Wave-like stripes, undulating lines, natural flowing patterns'
     },
     { 
-      name: 'Digital Checks', 
+      name: t('widgets.digitalChecks'), 
       growth: 'medium', 
-      categories: ['Outerwear', 'Bottoms'],
+      categories: [t('widgets.outerwear'), t('widgets.bottoms')],
       examples: 'Glitched plaids, pixelated checks, tech-inspired grids'
     },
     { 
-      name: 'Eco Textures', 
+      name: t('widgets.ecoTextures'), 
       growth: 'low', 
-      categories: ['Dresses', 'Tops'],
+      categories: [t('widgets.dresses'), t('widgets.tops')],
       examples: 'Nature-inspired textures, organic formations, sustainable motifs'
     },
   ];
@@ -48,9 +51,9 @@ const PatternTrendGraph = () => {
 
   const getGrowthLabel = (growth: string) => {
     switch (growth) {
-      case 'high': return 'High Growth';
-      case 'medium': return 'Medium Growth';
-      case 'low': return 'Low Growth';
+      case 'high': return t('widgets.highGrowth');
+      case 'medium': return t('widgets.mediumGrowth');
+      case 'low': return t('widgets.lowGrowth');
       default: return 'Unknown';
     }
   };
@@ -58,7 +61,7 @@ const PatternTrendGraph = () => {
   return (
     <Card className="shadow-sm">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold">Pattern Trends</h3>
+        <h3 className="text-lg font-semibold">{t('widgets.patternTrend')}</h3>
         <Grid className="w-5 h-5 text-indigo-500" />
       </div>
 
@@ -84,7 +87,7 @@ const PatternTrendGraph = () => {
         ))}
 
         <div className="mt-4 text-xs text-gray-500">
-          <p>Based on analysis of 5,200+ runway and retail patterns</p>
+          <p>{t('widgets.basedOn')} {t('widgets.analysis')} 5,200+ {t('widgets.runway')} {t('widgets.retail')} {t('widgets.patterns')}</p>
         </div>
       </div>
     </Card>

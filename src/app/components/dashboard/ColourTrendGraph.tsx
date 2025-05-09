@@ -2,20 +2,22 @@
 
 import { Card, Progress, Tag } from 'antd';
 import { TrendingUp } from 'lucide-react';
+import { useLocale } from '../../../context/LocaleContext';
 
 const ColourTrendGraph = () => {
+  const { t } = useLocale();
   const colourTrends = [
-    { color: 'Sage Green', percentage: 78, hex: '#9CAF88', change: '+12%' },
-    { color: 'Digital Lavender', percentage: 65, hex: '#E6E6FA', change: '+8%' },
-    { color: 'Terracotta', percentage: 59, hex: '#E2725B', change: '+5%' },
-    { color: 'Butter Yellow', percentage: 52, hex: '#F3E5AB', change: '+4%' },
-    { color: 'Digital Blue', percentage: 47, hex: '#0096FF', change: '-2%' },
+    { color: t('widgets.sageGreen'), percentage: 78, hex: '#9CAF88', change: '+12%' },
+    { color: t('widgets.digitalLavender'), percentage: 65, hex: '#E6E6FA', change: '+8%' },
+    { color: t('widgets.terracotta'), percentage: 59, hex: '#E2725B', change: '+5%' },
+    { color: t('widgets.butterYellow'), percentage: 52, hex: '#F3E5AB', change: '+4%' },
+    { color: t('widgets.digitalBlue'), percentage: 47, hex: '#0096FF', change: '-2%' },
   ];
 
   return (
     <Card className="shadow-sm">
       <div className="flex items-center justify-between mb-6">
-        <h3 className="text-lg font-semibold">Colour Trend</h3>
+        <h3 className="text-lg font-semibold">{t('widgets.colourTrend')}</h3>
         <TrendingUp className="w-5 h-5 text-indigo-500" />
       </div>
 
@@ -45,7 +47,7 @@ const ColourTrendGraph = () => {
               size="small"
             />
             <div className="flex justify-end text-xs text-gray-500 mt-1">
-              <span>{item.percentage}% popularity</span>
+              <span>{item.percentage}% {t('widgets.popularity')}</span>
             </div>
           </div>
         ))}
