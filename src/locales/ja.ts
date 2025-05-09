@@ -35,7 +35,14 @@ const ja = {
     decreasing: '減少中',
     stable: '安定',
     fluctuating: '変動中',
-    apply: '設定を適用'
+    apply: '設定を適用',
+    actual: '実績',
+    predicted: '予測',
+    averageDemand: '月間平均需要',
+    peakDemand: '最大需要',
+    perMonth: '月間個数',
+    trend: '傾向',
+    monthsAnalyzed: '{{count}}ヶ月の分析'
   },
   analytics: {
     title: '分析',

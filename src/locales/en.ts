@@ -35,7 +35,14 @@ const en = {
     decreasing: 'Decreasing',
     stable: 'Stable',
     fluctuating: 'Fluctuating',
-    apply: 'Apply Settings'
+    apply: 'Apply Settings',
+    actual: 'Actual',
+    predicted: 'Forecast',
+    averageDemand: 'Average Monthly Demand',
+    peakDemand: 'Peak Demand',
+    perMonth: 'units per month',
+    trend: 'Trend',
+    monthsAnalyzed: '{{count}} months analyzed'
   },
   analytics: {
     title: 'Analytics',

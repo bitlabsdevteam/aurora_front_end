@@ -198,6 +198,8 @@ const Analytics = () => {
 
   // Handle SKU selection
   const handleSKUChange = (value: string) => {
+    // Clear previous errors and reset data when changing SKUs
+    setError(null);
     setSelectedSKU(value);
     
     // Auto-fetch data when SKU is selected
@@ -206,6 +208,13 @@ const Analytics = () => {
       setTimeout(() => {
         fetchSalesData();
       }, 100);
+    } else {
+      // Clear data if no SKU is selected
+      setSalesData([]);
+      setChartData([]);
+      setMonthlyData([]);
+      setGrowthStats(null);
+      setSkuDetails(null);
     }
   };
 
@@ -364,13 +373,15 @@ const Analytics = () => {
 
   // Fetch sales data and generate chart
   const fetchSalesData = async () => {
+    // Clear previous errors when starting a new fetch
+    setError(null);
+    
     if (!selectedSKU) {
       setError(t('analytics.selectSKUFirst'));
       return;
     }
 
     setLoading(true);
-    setError(null);
 
     try {
       console.log('Fetching data for SKU:', selectedSKU);
@@ -380,19 +391,23 @@ const Analytics = () => {
       
       // Define the GraphQL query using salesBySku as shown in the image
       const salesBySkuQuery = `
-        query Sku {
-          salesBySku(skuId: "${selectedSKU}") {
+        query SalesBySku($skuId: String!) {
+          salesBySku(skuId: $skuId) {
             transactionId
             id
             date
             skuId
             storeId
+            quantitySold
+            soldCost
           }
         }
       `;
       
-      // Execute the sales by SKU query
-      const salesResponse = await client.request<GraphQLSalesBySkuResponse>(salesBySkuQuery);
+      // Execute the sales by SKU query with variables for better safety
+      const salesResponse = await client.request<GraphQLSalesBySkuResponse>(salesBySkuQuery, {
+        skuId: selectedSKU
+      });
       
       // Check if we have a valid sales response
       if (!salesResponse || !salesResponse.salesBySku || salesResponse.salesBySku.length === 0) {
@@ -466,13 +481,12 @@ const Analytics = () => {
       // Set the active tab to monthly view by default
       setActiveTab('monthly');
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch data');
       console.error('Error:', err);
+      setError(err instanceof Error ? err.message : 'Failed to fetch data');
       setSalesData([]);
       setChartData([]);
       setMonthlyData([]);
       setGrowthStats(null);
-      setSkuDetails(null);
     } finally {
       setLoading(false);
     }
@@ -480,6 +494,24 @@ const Analytics = () => {
 
   // Monthly chart component
   const MonthlyChartSection = () => {
+    if (!selectedSKU) {
+      return (
+        <Empty 
+          description={t('analytics.selectSKUFirst')} 
+          className="py-12" 
+        />
+      );
+    }
+    
+    if (monthlyData.length === 0) {
+      return (
+        <Empty 
+          description={t('analytics.noMonthlyData')} 
+          className="py-12" 
+        />
+      );
+    }
+    
     // Calculate monthly average for reference line
     const totalQuantity = monthlyData.reduce((sum, item) => sum + item.quantity, 0);
     const monthlyAverage = monthlyData.length > 0 ? totalQuantity / monthlyData.length : 0;
@@ -892,8 +924,8 @@ const Analytics = () => {
           ) : (
             <Empty
               description={
-                selectedSKU && dateRange
-                  ? t('analytics.noData')
+                selectedSKU 
+                  ? error || t('analytics.noData') 
                   : t('analytics.selectCriteria')
               }
               className="py-12"
