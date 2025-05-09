@@ -42,7 +42,9 @@ const en = {
     peakDemand: 'Peak Demand',
     perMonth: 'units per month',
     trend: 'Trend',
-    monthsAnalyzed: '{{count}} months analyzed'
+    monthsAnalyzed: '{{count}} months analyzed',
+    now: 'Now',
+    marketTrends: 'Market Trends'
   },
   analytics: {
     title: 'Analytics',

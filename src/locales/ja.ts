@@ -42,7 +42,9 @@ const ja = {
     peakDemand: '最大需要',
     perMonth: '月間個数',
     trend: '傾向',
-    monthsAnalyzed: '{{count}}ヶ月の分析'
+    monthsAnalyzed: '{{count}}ヶ月の分析',
+    now: '現在',
+    marketTrends: '市場トレンド'
   },
   analytics: {
     title: '分析',
